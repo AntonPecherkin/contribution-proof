@@ -1,0 +1,83 @@
+name: guard
+
+# Runs on every PR, including the very first one — deliberately independent of the
+# CI workflow that C0 introduces, so it protects the scaffold PR itself.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  protected-files:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.pull_request.labels.*.name, 'allow-protected')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail if a protected file was modified
+        run: |
+          # Boundary documents and frozen contracts. A scaffolding tool will happily
+          # overwrite README.md and .gitignore; an agent will occasionally "fix" a
+          # contract another agent is building against. Both are caught here.
+          PROTECTED="
+            README.md
+            .gitignore
+            .env.example
+            LICENSE
+            NOTICE
+            AGENTS.md
+            CLAUDE.md
+            src/lib/providers/types.ts
+          "
+          BASE="origin/${{ github.base_ref }}"
+          CHANGED="$(git diff --name-only "$BASE"...HEAD)"
+
+          VIOLATIONS=""
+          for f in $PROTECTED; do
+            if echo "$CHANGED" | grep -qx "$f"; then
+              VIOLATIONS="$VIOLATIONS $f"
+            fi
+          done
+          if echo "$CHANGED" | grep -q '^docs/tasks/'; then
+            VIOLATIONS="$VIOLATIONS docs/tasks/*"
+          fi
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "::error::This PR modifies protected files:$VIOLATIONS"
+            echo ""
+            echo "These are boundary documents or frozen contracts. Other agents are"
+            echo "building against them right now, and a scaffolding tool overwriting"
+            echo "README.md or .gitignore is the single most likely way a PR goes wrong."
+            echo ""
+            echo "If the change is genuinely intended, a human adds the 'allow-protected'"
+            echo "label to this PR. Do not add it yourself."
+            exit 1
+          fi
+          echo "No protected files touched."
+
+  no-new-dependencies:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.pull_request.labels.*.name, 'allow-deps')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail if the lockfile changed
+        run: |
+          # Six parallel sandboxes each running `npm install` produce six conflicting
+          # lockfiles. C0 owns dependencies; every Wave 1 task works with what it installed.
+          BASE="origin/${{ github.base_ref }}"
+          if git diff --name-only "$BASE"...HEAD | grep -qE '^(package-lock\.json|package\.json)$'; then
+            echo "::error::This PR changes package.json or package-lock.json."
+            echo ""
+            echo "Wave 1 tasks must not add dependencies — concurrent lockfile edits do not"
+            echo "merge cleanly. If the task genuinely cannot be done with what is installed,"
+            echo "say so in the PR description instead."
+            echo ""
+            echo "The scaffold task (C0) is the exception: a human adds the 'allow-deps' label."
+            exit 1
+          fi
+          echo "No dependency changes."
