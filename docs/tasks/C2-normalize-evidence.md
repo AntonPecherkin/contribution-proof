@@ -9,7 +9,7 @@ count into an honesty label. Test files exist and are skipped — un-skip and ma
 
 ## Files
 
-- Create: `src/lib/normalize.ts`, `src/lib/evidence.ts`
+- Modify: `src/lib/normalize.ts`, `src/lib/evidence.ts` - replace the stub bodies; **keep the exported signatures**
 - Modify: `tests/normalize.test.ts`, `tests/evidence.test.ts` — **only** to remove `.skip`.
 
 ## Produces

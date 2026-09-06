@@ -9,7 +9,7 @@ it and make it pass.
 
 ## Files
 
-- Create: `src/lib/scoring.ts`
+- Modify: `src/lib/scoring.ts` - replace the stub body; **keep the exported signatures**
 - Modify: `tests/scoring.test.ts` — **only** to remove `.skip`. Do not change an assertion.
 
 ## Consumes
