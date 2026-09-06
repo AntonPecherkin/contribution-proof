@@ -4,7 +4,7 @@ The brief for every agent working in this repository. Read it before touching a 
 
 ## What this repo is
 
-A standalone event application: an attendee submits one public X handle and receives an
+**Contribution Proof**, by ContentDC. A standalone event application: an attendee submits one public X handle and receives an
 evidence-bounded 0–1000 Technology Contribution Result. Built in 48 hours, and
 **intended to become a public open-source repository.**
 

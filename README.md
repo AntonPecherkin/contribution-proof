@@ -1,4 +1,6 @@
-# Tech Contribution Check
+# Contribution Proof
+
+*by ContentDC*
 
 An event application: an attendee submits one public X handle and receives an
 evidence-bounded **Technology Contribution Result** — an experimental 0–1000 score
