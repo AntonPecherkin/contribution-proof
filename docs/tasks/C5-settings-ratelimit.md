@@ -28,7 +28,9 @@ export async function getSettings(): Promise<Settings>;
 export function clearSettingsCache(): void;    // tests only
 
 // ratelimit.ts
-export type LimitResult = { allowed: true } | { allowed: false; reason: 'ip' | 'handle' | 'event' };
+export type LimitResult =
+  | { allowed: true }
+  | { allowed: false; reason: 'ip' | 'handle' | 'event' | 'unavailable' };
 export async function checkAndIncrement(opts: {
   ip: string; handle: string; eventId: string;
 }): Promise<LimitResult>;
