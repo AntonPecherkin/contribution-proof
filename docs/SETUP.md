@@ -11,12 +11,20 @@ are written and validated.
    duplicating, which is deliberate.
 3. Open **Project Settings → API** and copy two values:
    - **Project URL** → `SUPABASE_URL`
-   - **`service_role` key** (not `anon`) → `SUPABASE_SERVICE_ROLE_KEY`
+   - Under **Secret keys**, the `default` one → **Reveal** → `SUPABASE_SECRET_KEY`.
+     It begins `sb_secret_`.
 
-**The `service_role` key bypasses row-level security.** That is correct here — the browser
-never touches the database, every read goes through an API route that serializes an
-allowlist — but it means the key must never appear in client code or in any variable
-prefixed `NEXT_PUBLIC_`.
+**Take the Secret key, not the Publishable one.** Supabase renamed these — `anon` is now
+Publishable and `service_role` is now Secret. The page shows both, and the Publishable key
+will connect without error and then silently return nothing, because it has no privileges.
+
+**The Secret key bypasses row-level security.** That is correct here — the browser never
+touches the database, and every read goes through an API route that serializes an allowlist
+— but it means the key must never appear in client code or in any variable prefixed
+`NEXT_PUBLIC_`.
+
+A project created before the rename can use `SUPABASE_SERVICE_ROLE_KEY` instead; the code
+accepts either.
 
 ### Why this project needs a database at all
 
@@ -30,7 +38,7 @@ Add to `.env.local` — the file is gitignored and already has the other keys:
 
 ```
 SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_SECRET_KEY=
 ```
 
 **Paste with your editor, not the terminal.** A command echoes into the session transcript,
@@ -51,7 +59,7 @@ MOCK=1 npm run dev   # fixtures, no database, no keys
    | Name | |
    |---|---|
    | `SUPABASE_URL` | |
-   | `SUPABASE_SERVICE_ROLE_KEY` | |
+   | `SUPABASE_SECRET_KEY` | the Secret key, not Publishable |
    | `BRIGHTDATA_API_KEY` | |
    | `BRIGHTDATA_X_PROFILE_DATASET` | `gd_lwxmeb2u1cniijd7t4` |
 
