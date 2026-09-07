@@ -194,16 +194,14 @@ Roughly a third of accounts return a null posts array, concentrated in accounts 
 posted less often. At a developer event that is most of the room, so this is a first-class
 result, not an error page.
 
-It carries a **Profile Score on the same 0–1000 range** as the Contribution Score, rounded
-to the nearest ten, and — like every score here — rendered bare, with no denominator.
+It carries a **Profile Score of its own**, rendered bare like every score here — nothing on
+screen ever reads `/100` or `/1000`.
 
-One visible scale keeps the result page coherent and removes the invitation to derive
-percentages from a slash. The two remain different measurements, and the separation is
-carried by **name and placement** rather than by range: this is a *Profile* Score, computed
-from a bio and profile facts, and it never ranks on the room board against scores derived
-from twenty analysed posts.
+The two are different measurements, kept apart by **name and placement** rather than by
+anything on the card: this is a *Profile* Score, computed from a bio and profile facts, and
+it never ranks on the room board against scores derived from twenty analysed posts.
 
-Four components of 250, mirroring the main score's shape:
+Four components of 25, mirroring the main score's shape:
 
 | Component | Full marks at |
 |---|---|
@@ -213,7 +211,7 @@ Four components of 250, mirroring the main score's shape:
 | **Presence** | verified, plus a follower ratio far from 1 in either direction |
 
 A missing fact scores 0 for its part rather than blocking the score — we would rather hand
-someone 410 from three parts than nothing from four. Both directions of the follower ratio
+someone 41 from three parts than nothing from four. Both directions of the follower ratio
 earn equal credit: being followed is reach, following widely is participation, and neither
 is a shortfall.
 
@@ -348,7 +346,7 @@ this project, which is why they are written down.
 | A job queue, Redis, an ORM, an analytics vendor | Postgres and the framework | Each is a plausible-looking day of work that buys nothing at this scale. |
 | A second post provider alongside the first | One provider, disclosed limits | Two providers means two eligibility semantics and two result qualities in the same room. One honest limitation beats two inconsistent ones. |
 | A language model judging posts | Keyword topics plus heuristic depth | The model read intent better, but cost a key, a credit balance, ~10 s, and a class of failures outside this repo. Deterministic scoring is reproducible, inspectable and free — and at a booth, being able to show which words matched beats a subtler judgement nobody can check. |
-| A separate 0-100 scale for the Profile Score | One 0-1000 range for both | Two ranges made the result page incoherent and invited percentage arithmetic off the denominators. Name and placement carry the distinction instead. |
+| Denominators on either score | Bare numbers everywhere | `82/100` beside `660/1000` invites percentage arithmetic across two measurements that are not comparable. No slash, no invitation. |
 
 ---
 

@@ -10,13 +10,12 @@ import type { ProfileSummary } from './providers/types';
  * feel handed a consolation prize, so this is built to be *liked*: every signal below is a
  * true statement framed as something worth being.
  *
- * It carries a **Profile Score on the same 0-1000 range** as the Contribution Score, and
- * both render bare — no denominator, ever. One visible scale keeps the result page coherent
- * and stops anyone deriving percentages from a slash.
+ * It carries a **Profile Score of its own**, rendered bare — no denominator, exactly as the
+ * Contribution Score is. Nothing on screen ever reads "/100" or "/1000".
  *
- * The two are still different measurements, and the separation is carried by name and by
- * placement rather than by range: this is a *Profile* Score, computed from a bio and profile
- * facts, and it never ranks on the room board against scores derived from twenty posts.
+ * The two are different measurements and are kept apart by name and by placement: this is a
+ * *Profile* Score, computed from a bio and profile facts, and it never ranks on the room
+ * board against scores derived from twenty posts.
  *
  * The other rule: no signal is ever a deficit. We never render "only 186 followers" or
  * "just 97 posts". If a fact cannot be said warmly and truthfully, it is left out. The
@@ -25,7 +24,7 @@ import type { ProfileSummary } from './providers/types';
 
 export type Signal = { id: string; label: string; detail: string };
 
-/** Four parts of 250, on the same range as the Contribution Score. */
+/** Four parts of 25. */
 export type ProfileComponents = {
   topics: number;
   tenure: number;
@@ -33,7 +32,7 @@ export type ProfileComponents = {
   presence: number;
 };
 
-export const PROFILE_CAP = 250;
+export const PROFILE_CAP = 25;
 /** Bio topics that earn full marks. */
 export const TOPIC_TARGET = 3;
 /** Years on X that earn full marks. */
@@ -49,7 +48,7 @@ export type ProfileSignal = {
   accountAgeYears: number | null;
   postsPerYear: number | null;
   followerRatio: number | null;
-  /** 0-1000, rendered bare. Never on the room board. */
+  /** 0-100, rendered bare — no denominator, like every score here. Never on the board. */
   profileScore: number;
   components: ProfileComponents;
   /** Short, specific, and never generic — this is what people screenshot. */
@@ -134,7 +133,7 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
   if (profile.externalLink) add('ships', 'Ships things', 'There is a link in your bio');
   if (profile.location) add('located', 'On the map', profile.location);
 
-  // Each component is 0-250 and rounded, so the visible parts add up to the visible whole.
+  // Each component is 0-25 and rounded, so the visible parts add up to the visible whole.
   // A missing fact scores 0 for that part rather than blocking the score: we would rather
   // hand someone 41 with three parts than nothing at all.
   const components: ProfileComponents = {
@@ -158,12 +157,8 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
     profile,
     topics,
     matchedWords: [...new Set(matched)],
-    // Rounded to the nearest 10, exactly as the Contribution Score is, so neither number
-    // looks more precise than the other.
     profileScore:
-      Math.round(
-        (components.topics + components.tenure + components.cadence + components.presence) / 10,
-      ) * 10,
+      components.topics + components.tenure + components.cadence + components.presence,
     components,
     accountAgeYears: ageYears === null ? null : Number(ageYears.toFixed(1)),
     postsPerYear,
