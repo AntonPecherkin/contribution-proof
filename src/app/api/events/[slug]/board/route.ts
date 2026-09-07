@@ -12,11 +12,37 @@ import { getDb } from '../../../../../lib/db';
 
 export const revalidate = 0;
 
+/**
+ * MOCK=1 serves a representative room so the board can be designed, demoed and rehearsed
+ * with no database and no event. The numbers are the real measured ones.
+ */
+function mockRoom(): CompletedAnalysis[] {
+  const at = (mins: number) => new Date(Date.now() - mins * 60_000).toISOString();
+  return [
+    { handle: 'superteammy', score: 780, kind: 'analysis', technologyPosts: 13, views: 155_952, topics: ['scaling', 'open-source', 'devtools'], completedAt: at(52), optedIn: true },
+    { handle: 'jemmmyjemm', score: 760, kind: 'analysis', technologyPosts: 13, views: 100_926, topics: ['scaling', 'open-source'], completedAt: at(3), optedIn: true },
+    { handle: 'nikkideyy', score: 710, kind: 'analysis', technologyPosts: 9, views: 55_396, topics: ['open-source', 'creator-economy'], completedAt: at(18), optedIn: true },
+    { handle: 'ohmeohmy_sol', score: 570, kind: 'analysis', technologyPosts: 8, views: 13_691, topics: ['scaling', 'payments'], completedAt: at(9), optedIn: true },
+    { handle: 'nicfury', score: 540, kind: 'analysis', technologyPosts: 4, views: 13_326, topics: ['prediction', 'consensus'], completedAt: at(26), optedIn: true },
+    { handle: 'contentdc', score: 54, kind: 'profile', technologyPosts: null, views: null, topics: ['creator-economy', 'prediction'], completedAt: at(1), optedIn: true },
+    { handle: 'aapecherkin', score: 51, kind: 'profile', technologyPosts: null, views: null, topics: ['scaling', 'language-models'], completedAt: at(14), optedIn: true },
+    // Present in the totals, absent from every named list.
+    { handle: 'did-not-opt-in', score: 690, kind: 'analysis', technologyPosts: 11, views: 40_000, topics: ['security'], completedAt: at(7), optedIn: false },
+  ];
+}
+
 export async function GET(
   _request: Request,
   context: { params: Promise<{ slug: string }> },
 ): Promise<NextResponse> {
   const { slug } = await context.params;
+
+  if (process.env.MOCK === '1') {
+    return NextResponse.json(buildBoard(mockRoom()), {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+
   const db = getDb();
 
   const { data: event } = await db.from('events').select('id').eq('slug', slug).maybeSingle();

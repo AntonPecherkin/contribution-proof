@@ -26,8 +26,9 @@ function Row({ row, rank }: { row: BoardRow; rank?: number }) {
     <li className="board-row">
       {rank !== undefined && <span className="board-rank">{rank}</span>}
       <span className="board-handle">@{row.handle}</span>
+      {/* Top Today is a ranking: a topic column there costs the handle the width it needs. */}
+      {rank === undefined && row.topTopic && <span className="board-topic">{row.topTopic}</span>}
       <span className="board-score">{row.score}</span>
-      {row.topTopic && <span className="board-topic">{row.topTopic}</span>}
     </li>
   );
 }

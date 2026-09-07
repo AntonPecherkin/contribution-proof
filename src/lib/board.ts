@@ -1,4 +1,4 @@
-import { labelForTopic } from './taxonomy';
+import { labelForTopic, shortTopic } from './taxonomy';
 
 /**
  * Builds the room board payload.
@@ -71,7 +71,7 @@ export function buildBoard(rows: readonly CompletedAnalysis[], limit = 6): Board
     handle: r.handle,
     score: r.score ?? 0,
     kind: r.kind ?? 'analysis',
-    topTopic: r.topics?.[0] ? labelForTopic(r.topics[0]) : null,
+    topTopic: r.topics?.[0] ? shortTopic(r.topics[0]) : null,
   });
 
   const justIn = [...named]

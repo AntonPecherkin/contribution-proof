@@ -14,6 +14,8 @@
 export type Topic = {
   readonly id: string;
   readonly label: string;
+  /** Two words at most. Full labels do not fit a projector row or a result card. */
+  readonly short: string;
   readonly definition: string;
   readonly counts: string;
   readonly doesNotCount: string;
@@ -27,6 +29,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'cryptography',
     label: 'Cryptography and zero-knowledge',
+    short: 'Cryptography',
     definition: 'Proof systems, encryption, signatures, and the assumptions they rest on.',
     counts: 'Explaining why a trusted setup needs no single party to hold the toxic waste.',
     doesNotCount: 'Announcing that a project "uses ZK" without saying what it proves.',
@@ -61,6 +64,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'consensus',
     label: 'Consensus and distributed systems',
+    short: 'Consensus',
     definition: 'Agreement protocols, replication, fault tolerance, and their failure modes.',
     counts: 'Describing how a synchrony assumption changes a protocol’s liveness guarantee.',
     doesNotCount: 'Reporting that a chain had an outage, with no account of why.',
@@ -96,6 +100,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'scaling',
     label: 'Blockchain infrastructure and scaling',
+    short: 'Scaling',
     definition: 'Execution, data availability, rollups, state growth, and node operation.',
     counts: 'Arguing that data availability, not execution, is the binding constraint.',
     doesNotCount: 'Posting a throughput number with no method behind it.',
@@ -142,6 +147,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'smart-contracts',
     label: 'Smart contracts and on-chain programming',
+    short: 'Contracts',
     definition: 'Contract languages, virtual machines, upgrade patterns, and gas behaviour.',
     counts: 'Explaining what EIP-7702 changes about how an EOA can act.',
     doesNotCount: 'Sharing a contract address with no explanation.',
@@ -180,6 +186,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'ml-systems',
     label: 'Machine learning systems',
+    short: 'ML systems',
     definition: 'Training, inference, serving, and the engineering that makes them work.',
     counts: 'Explaining why the slowest node sets the pace in synchronous training.',
     doesNotCount: 'Sharing a benchmark leaderboard screenshot without interpretation.',
@@ -213,6 +220,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'language-models',
     label: 'Language models and applied AI',
+    short: 'AI models',
     definition: 'Model behaviour, prompting, evaluation, fine-tuning, and cost control.',
     counts: 'Showing how caching a stable prompt prefix cut inference cost, and why.',
     doesNotCount: 'Reacting to a model release with no claim about what changed.',
@@ -249,6 +257,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'agents',
     label: 'AI agents and tooling',
+    short: 'Agents',
     definition: 'Tool use, orchestration, evaluation harnesses, and agent failure modes.',
     counts: 'Explaining why non-deterministic tool naming breaks an agent chain.',
     doesNotCount: 'Demoing an agent with no account of what it does when it fails.',
@@ -274,6 +283,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'data',
     label: 'Data engineering and retrieval',
+    short: 'Data',
     definition: 'Pipelines, indexes, vector search, and the quality of what comes back.',
     counts: 'Comparing recall at fixed latency across vector databases, with method.',
     doesNotCount: 'Naming a database as a favourite with no comparison.',
@@ -306,6 +316,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'security',
     label: 'Security and auditing',
+    short: 'Security',
     definition: 'Vulnerability classes, verification, threat models, and post-mortems.',
     counts: 'A post-mortem tracing an outage to a retry loop with no jitter.',
     doesNotCount: 'Announcing that an audit was passed.',
@@ -339,6 +350,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'devtools',
     label: 'Developer tooling and languages',
+    short: 'Dev tooling',
     definition: 'Compilers, type systems, build systems, testing, and language design.',
     counts: 'Explaining what a type system change makes impossible to express.',
     doesNotCount: 'Stating a language preference with no reasoning.',
@@ -373,6 +385,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'performance',
     label: 'Hardware and performance',
+    short: 'Performance',
     definition: 'Latency, throughput, memory behaviour, and the measurement of them.',
     counts: 'Arguing that time-to-first-token matters more to users than tokens per second.',
     doesNotCount: 'Posting a speed claim with no baseline.',
@@ -404,6 +417,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'identity',
     label: 'Decentralized identity and privacy',
+    short: 'Identity',
     definition: 'Credentials, key management, selective disclosure, and metadata leakage.',
     counts: 'Explaining what a credential scheme reveals to a verifier and what it hides.',
     doesNotCount: 'Asserting that a product is private, without a threat model.',
@@ -432,6 +446,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'mechanism-design',
     label: 'Protocol economics and mechanism design',
+    short: 'Incentives',
     definition: 'Incentives, fee markets, auctions, and how participants respond to them.',
     counts: 'Explaining how local fee markets stop one hot account pricing out a chain.',
     doesNotCount: 'Price commentary, market calls, or token predictions of any kind.',
@@ -466,6 +481,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'creator-economy',
     label: 'Creator economy and distribution',
+    short: 'Creator economy',
     definition: 'How work reaches an audience: publishing, distribution, and what creators earn.',
     counts: 'Explaining why a distribution channel changes what a creator can charge.',
     doesNotCount: 'Announcing a follower milestone.',
@@ -479,6 +495,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'prediction',
     label: 'Prediction and forecasting',
+    short: 'Prediction',
     definition: 'Estimating what happens next, and the markets and models that price it.',
     counts: 'Explaining how a prediction market aggregates private information into a price.',
     doesNotCount: 'Posting a price target.',
@@ -491,6 +508,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'payments',
     label: 'Payments and settlement',
+    short: 'Payments',
     definition: 'Moving value: rails, stablecoins, settlement, payouts, and their costs.',
     counts: 'Explaining why settlement finality changes what a payout flow can promise.',
     doesNotCount: 'Announcing that a payment integration is live.',
@@ -503,6 +521,7 @@ export const TAXONOMY: readonly Topic[] = [
   {
     id: 'open-source',
     label: 'Open source and standards',
+    short: 'Open source',
     definition: 'Specifications, interoperability, licensing, and maintenance practice.',
     counts: 'Explaining why a spec ambiguity produced two incompatible implementations.',
     doesNotCount: 'Announcing a release with no description of what changed.',
@@ -539,3 +558,7 @@ export const isTopicId = (value: string): boolean => TOPIC_IDS.includes(value);
 
 export const labelForTopic = (id: string): string =>
   TAXONOMY.find((t) => t.id === id)?.label ?? id;
+
+/** For rows and cards, where a full label wraps or truncates. */
+export const shortTopic = (id: string): string =>
+  TAXONOMY.find((t) => t.id === id)?.short ?? id;

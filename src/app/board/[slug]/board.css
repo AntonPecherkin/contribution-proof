@@ -14,14 +14,15 @@
   --purple: #a769ff;
   --yellow: #f0d600;
 
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   padding: 4vh 4vw;
   background: var(--bg);
   color: #f6f6f6;
   font-family: Inter, system-ui, sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 4vh;
+  gap: 2.4vh;
 }
 
 .board-eyebrow {
@@ -40,7 +41,7 @@
 .board-totals div { display: flex; flex-direction: column-reverse; }
 .board-totals dd {
   margin: 0;
-  font-size: 7vw;
+  font-size: 5.6vw;
   font-weight: 700;
   line-height: 1;
   color: var(--yellow);
@@ -75,9 +76,9 @@
   display: flex;
   align-items: baseline;
   gap: 1.4vw;
-  padding: 1.4vh 0;
+  padding: 1vh 0;
   border-bottom: 1px solid var(--line);
-  font-size: 2.4vw;
+  font-size: 2vw;
   /* New rows arrive rather than appear. */
   animation: board-in 420ms ease-out both;
 }
@@ -90,9 +91,15 @@
 }
 
 .board-rank { color: var(--muted); min-width: 2ch; }
-.board-handle { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.board-score { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--yellow); }
-.board-topic { font-size: 1.2vw; color: var(--muted); min-width: 12ch; text-align: right; }
+.board-handle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-score { font-weight: 700; margin-left: auto; font-variant-numeric: tabular-nums; color: var(--yellow); }
+.board-topic {
+  font-size: 1.15vw;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
 
 .board-foot { border-top: 1px solid var(--line); padding-top: 2vh; }
 .board-topics { margin: 0 0 0.6vh; font-size: 1.5vw; color: var(--purple); }
