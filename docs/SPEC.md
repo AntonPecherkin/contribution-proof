@@ -35,9 +35,13 @@ shown with how many posts were actually analyzed and how confident that sample m
 - Up to the **latest 20 eligible public posts**. The intent is original posts, thread roots
   and quote posts, with replies and reposts excluded — but the provider exposes no such
   indicator, so this is approximated and disclosed rather than guaranteed.
+- **No language model, and no external service beyond the post provider.** Every judgement
+  is a pure function of the text: reproducible, inspectable, free, and measured at 3–9 ms.
 - An experimental **0–1000** score from four public components.
-- **Four headline cards**, a Power Topics section, a short narrative, three contribution
-  opportunities, and a downloadable share image.
+- **Four headline cards** with the score decomposed into visible component bars, a Power
+  Topics section, fun stats, three contribution opportunities, and a downloadable share
+  image.
+- A **Profile Signal** for accounts whose posts the provider will not return.
 - One preconfigured event and one public, sanitized room board.
 - A standalone Postgres database owned only by this product.
 
@@ -66,8 +70,9 @@ The ordering is deliberate and is the single largest latency win in the design.
 
 3. Analyzing      four truthful stages, polling
 
-4. Result         score, evidence, four cards, Power Topics, narrative,
+4. Result         score, evidence, four cards, Power Topics, fun stats,
                   three opportunities, share card
+                  — or a Profile Signal when there are no posts to read
 ```
 
 Analysis consent sits on **step 1**, not step 2, so that consent still strictly precedes
@@ -98,47 +103,118 @@ Always display the real analyzed count. Zero eligible posts must never render as
 
 ### Score
 
-Experimental, 0–1000, four components capped at 250 each, rounded to the nearest 10:
+Experimental, 0–1000. Four components worth 250 each, summed and rounded to the nearest 10.
+Every component is capped independently, so none can run away with the total.
 
-1. **Relevance** — share of eligible posts classified as emerging-technology content.
-2. **Explanation** — mean rating for explaining rather than merely mentioning.
-3. **Consistency** — spread of relevant posts across active weeks, capped at four weeks.
-4. **Public response** — log-scaled, capped views and conversations, so one viral post cannot
-   dominate.
+**One gate applies first: with zero technology posts, all four components return 0** —
+including reach. Without it, a popular non-technology account would collect points for
+attention its contribution never earned.
 
-Deterministic code owns every number. The language model classifies and writes prose; it never
-computes an arithmetic result.
+#### 1. Topics — how much of what you post is about technology
+
+```
+250 × (technology posts ÷ eligible posts)
+```
+
+Post text is matched against a 14-topic keyword taxonomy; one hit makes a post technology.
+Keywords of four characters or fewer must match as standalone words — without that rule,
+"did" matches "did we just", and it did.
+
+A **proportion, not a count**: nine technology posts out of twenty beats nine out of a
+hundred. It measures focus.
+
+#### 2. Depth — do you explain, or just mention
+
+```
+250 × mean depth of your technology posts
+```
+
+Each post scores 0–1:
+
+| Signal | Adds |
+|---|---|
+| Length, saturating at 250 characters | up to 0.35 |
+| Explanatory words — because, why, how, tradeoff, which means | 0.30 |
+| A measured claim — `40%`, `p95`, `2.3x`, `120ms` | 0.20 |
+| Thread marker — `1/6`, 🧵 | 0.15 |
+
+Two overrides: a link-only post scores 0.05, and anything under 50 characters is capped at
+0.15 — a remark stays a remark however many keywords it contains.
+
+These are proxies for explanation, not comprehension. A well-written short post will
+underscore and a long rambling one will overscore. That is the accepted cost of a measure
+anyone can check by hand.
+
+#### 3. Streak — did you keep at it
+
+```
+250 × (longest run of consecutive weeks ÷ 4), capped at 4
+```
+
+Consecutive calendar weeks containing at least one technology post.
+
+This replaced a spread measure that gave four posts scattered across four years full marks,
+because perfectly spread is arithmetically perfect consistency. A streak cannot be gamed
+that way, and reads better on a card than an evenness index.
+
+#### 4. Reach — did it land
+
+```
+250 × (0.7 × views + 0.3 × replies)
+```
+
+Each log-scaled against a ceiling — 500,000 views, 2,000 replies — so a tenfold jump moves
+the score by a few points, not hundreds. One viral post cannot dominate.
+
+Totals span **technology posts only**, not the account.
+
+**A metric the provider did not report scores 0.35, not 0.** Views are absent on posts from
+before 2023 and present on essentially all posts since; treating absence as "nobody saw it"
+would punish people for a gap in our data.
 
 ### Four cards (v1)
 
-Technology Contribution Score · Technology posts · Public views · Active weeks.
+Technology Contribution Score · Technology posts · Public views · Active weeks, with the
+four components shown as bars so the total is always decomposable on screen.
 
-Power Topics is a **separate wide section** beneath them, not a fifth tile.
+Power Topics is a separate wide section beneath them, not a fifth tile.
 
-### Narrative and opportunities
+### Fun stats
 
-One structured model request returns per-post classification, topics, Power Topics, and a
-short narrative. The narrative may only restate structured evidence — never invent a number,
-never predict adoption or impact. Three opportunities come from a versioned public catalog,
-matched on topic overlap and declared contribution needs. Sponsors are labelled and receive
-no hidden ranking boost.
+The entertaining half, all plain facts about the posts we read — no judgement, nothing to
+argue with, and the part people screenshot:
 
-### Copy rules
+window analyzed · posts analyzed · longest streak · busiest weekday · median post length ·
+longest post · thread starts · link share rate · question rate · best post · total and
+median views.
 
-- Score renders as a bare number: `820`, never `820/1000`.
-- `Contribution opportunity` — never "predicted adoption", never "guaranteed impact".
-- Missing provider values render `Not available`, never `0`.
-- The result page states `We'll email you when early access opens.` **Nothing is sent during
-  the event**; leads are exported afterwards.
-- The board is headed `Top accounts analyzed in this room` with a permanently visible note
-  that X ownership is not verified.
+### Profile Signal — the result when there are no posts
 
----
+Roughly a third of accounts return a null posts array, concentrated in accounts that have
+posted less often. At a developer event that is most of the room, so this is a first-class
+result, not an error page.
+
+It carries **no 0–1000 score and never appears on the room board.** A bio and twenty posts
+are not the same measurement, and one board showing both would make them look like one.
+
+A headline — `Class of 2020`, else the top bio topic, else `New around here` — and badges
+drawn from the profile: Verified, Long hauler / Established / Fresh start, Prolific /
+Steady hand / Selective, Carries / Curious, Range / Focused, Ships things, On the map.
+Topics come from the bio, read through the same taxonomy the posts use.
+
+**No signal may be a deficit.** 186 followers against 587 following is "Curious — follows
+more people than follow back", never "only 186". Posting seventeen times a year is
+"Selective — posts when there is something to say". A test asserts the copy contains no
+shortfall language. If a fact cannot be said warmly and truthfully, it is left out.
+
+The accompanying note names the provider as the limit and ends "Nothing about your account
+is wrong", because the failure is ours and should read that way.
 
 ## Latency
 
-Collection is asynchronous and slow. Measured against our own account: **85–127 seconds** to
-trigger, poll, and download one profile.
+Collection is asynchronous and slow, and it is the only slow thing left. Measured against
+our own account: **85–127 seconds** to trigger, poll and download one profile — and **3–9
+milliseconds** for everything after it, because everything after it is a pure function.
 
 | Lane | When | Total |
 |---|---|---|
@@ -187,9 +263,8 @@ say that plainly instead of implying a precision we do not have.
 
 - Next.js App Router on Vercel; Postgres owned only by this product.
 - A swappable `PostProvider` interface; the primary is chosen at runtime, not at build time.
-- **One model call per analysis**, using a byte-stable cached prefix (taxonomy + rubric +
-  examples) with the participant's posts appended after the cache breakpoint. The prefix is
-  identical for every participant, which is what makes it worth caching.
+- **No model call.** Classification, depth, scoring and stats are pure functions over the
+  provider's response, so an analysis cannot fail for a reason outside this repository.
 - Server routes own every credential. Nothing reaches the browser but an allowlisted payload.
 
 ### The analysis row is the job
@@ -252,6 +327,8 @@ this project, which is why they are written down.
 | Realtime websockets for the board | 5-second polling | Venue Wi-Fi drops websockets; a reconnect bug on a projector is unrecoverable. |
 | A job queue, Redis, an ORM, an analytics vendor | Postgres and the framework | Each is a plausible-looking day of work that buys nothing at this scale. |
 | A second post provider alongside the first | One provider, disclosed limits | Two providers means two eligibility semantics and two result qualities in the same room. One honest limitation beats two inconsistent ones. |
+| A language model judging posts | Keyword topics plus heuristic depth | The model read intent better, but cost a key, a credit balance, ~10 s, and a class of failures outside this repo. Deterministic scoring is reproducible, inspectable and free — and at a booth, being able to show which words matched beats a subtler judgement nobody can check. |
+| A score on the Profile Signal | No score there at all | It would rank against post-derived scores on the same board and mean something different. |
 
 ---
 
@@ -259,6 +336,8 @@ this project, which is why they are written down.
 
 - End-to-end production flow works against real providers.
 - `MOCK=1` runs the whole application from fixtures, with no network and no credentials.
+- The full test suite passes with an entirely empty environment (`env -i`).
+- An account whose posts come back null receives a Profile Signal, not an error.
 - Lint, strict typecheck, all unit and contract tests, and the smoke test pass.
 - Invalid, private, empty, slow, and malformed-provider cases each behave correctly, and zero
   eligible posts yields no score rather than a score of zero.
