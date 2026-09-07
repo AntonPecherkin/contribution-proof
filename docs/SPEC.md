@@ -123,7 +123,7 @@ attention its contribution never earned.
 250 × (technology posts ÷ eligible posts)
 ```
 
-Post text is matched against a 14-topic keyword taxonomy; one hit makes a post technology.
+Post text is matched against a 17-topic keyword taxonomy; one hit makes a post technology.
 Keywords of four characters or fewer must match as standalone words — without that rule,
 "did" matches "did we just", and it did.
 

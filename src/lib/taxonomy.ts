@@ -21,7 +21,7 @@ export type Topic = {
   readonly keywords: readonly string[];
 };
 
-export const TAXONOMY_VERSION = '1.0.0';
+export const TAXONOMY_VERSION = '1.1.0';
 
 export const TAXONOMY: readonly Topic[] = [
   {
@@ -461,6 +461,43 @@ export const TAXONOMY: readonly Topic[] = [
       'liquidity',
       'priority fee',
       'gas auction',
+    ],
+  },
+  {
+    id: 'creator-economy',
+    label: 'Creator economy and distribution',
+    definition: 'How work reaches an audience: publishing, distribution, and what creators earn.',
+    counts: 'Explaining why a distribution channel changes what a creator can charge.',
+    doesNotCount: 'Announcing a follower milestone.',
+    keywords: [
+      'creator','content creator','creator economy','distribution','audience','publishing',
+      'monetiz','engagement','impressions','reach','newsletter','podcast','livestream',
+      'sponsorship','brand deal','affiliate','subscriber','social graph','feed algorithm',
+      'attention',
+    ],
+  },
+  {
+    id: 'prediction',
+    label: 'Prediction and forecasting',
+    definition: 'Estimating what happens next, and the markets and models that price it.',
+    counts: 'Explaining how a prediction market aggregates private information into a price.',
+    doesNotCount: 'Posting a price target.',
+    keywords: [
+      'prediction','predictive','forecast','probability','odds','oracle','base rate',
+      'calibration','prediction market','polymarket','estimator','signal','backtest',
+      'expected value','confidence interval',
+    ],
+  },
+  {
+    id: 'payments',
+    label: 'Payments and settlement',
+    definition: 'Moving value: rails, stablecoins, settlement, payouts, and their costs.',
+    counts: 'Explaining why settlement finality changes what a payout flow can promise.',
+    doesNotCount: 'Announcing that a payment integration is live.',
+    keywords: [
+      'payment','payout','stablecoin','usdc','usdt','settlement','remittance','invoice',
+      'checkout','merchant','fiat','on-ramp','off-ramp','payment rail','chargeback',
+      'micropayment','escrow',
     ],
   },
   {
