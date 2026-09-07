@@ -57,14 +57,24 @@ Self-hosted rather than serverless, and not only for cost. Bright Data collectio
 85-140 seconds, and `after()` on a long-lived process simply finishes its work instead of
 racing a function freeze - which is the failure the stale-row revival exists to catch.
 
-On the server, matching the shape used for the other services here:
+The repository is private, so the box has no GitHub credentials and does not need any.
+Push the source from the developer machine instead:
 
 ```bash
-git clone https://github.com/AntonPecherkin/contribution-proof.git
-cd contribution-proof
+rsync -az --delete \
+  --exclude node_modules --exclude .next --exclude .git \
+  --exclude .env --exclude .env.local \
+  ./ myvpsContentDAO:/home/ubuntu/contribution-proof/
 ```
 
-Create `.env` beside `docker-compose.yml` - compose reads it automatically:
+Create `.env` beside `docker-compose.yml` - compose reads it automatically. Write it over
+stdin rather than pasting into a shell, so no secret enters a command line or shell history:
+
+```bash
+ssh myvpsContentDAO 'umask 077 && cat > /home/ubuntu/contribution-proof/.env'
+```
+
+Contents:
 
 ```
 SUPABASE_URL=
@@ -98,9 +108,15 @@ every visitor shares one bucket and the tenth person of the day is refused.
 
 ### Redeploying
 
+From the developer machine:
+
 ```bash
-git pull --ff-only && docker compose up -d --no-deps --build contribution-proof
+rsync -az --delete --exclude node_modules --exclude .next --exclude .git \
+  --exclude .env --exclude .env.local ./ myvpsContentDAO:/home/ubuntu/contribution-proof/
+ssh myvpsContentDAO 'cd /home/ubuntu/contribution-proof && docker compose up -d --build'
 ```
+
+`.env` is excluded from every sync, so a redeploy never overwrites the server's credentials.
 
 The image carries no secrets: every key is read at call time, so the same image runs
 anywhere and rebuilding never bakes a credential in.
@@ -113,6 +129,14 @@ https://proof.contentdao.app/board/hackathon-2026              → the room boar
 ```
 
 An empty board with `0 builders` is success: the database answered and the room is empty.
+
+## Deployed
+
+- Host `myvpsContentDAO` (147.93.187.35), `/home/ubuntu/contribution-proof`
+- Container `contribution-proof-contribution-proof-1`, host-local `127.0.0.1:3040`
+- **3020 was already taken** by `brand-onboarding-mcp-createpool`; `HOST_PORT` exists for
+  exactly this reason. Check `ss -tln` before assuming a port is free on this box.
+- Not yet public: nginx and DNS are still to do.
 
 ## Event day
 
