@@ -22,7 +22,15 @@ const MODEL = 'claude-opus-5';
  */
 function client(): Anthropic | null {
   try {
-    return new Anthropic();
+    // An organization-scoped key must name a workspace on every request; a
+    // workspace-scoped key must not. Supporting both means either kind of key works
+    // without the caller having to know which they were given.
+    const workspaceId = process.env.ANTHROPIC_WORKSPACE_ID;
+    return new Anthropic(
+      workspaceId
+        ? { defaultHeaders: { 'anthropic-workspace-id': workspaceId } }
+        : undefined,
+    );
   } catch {
     return null;
   }
