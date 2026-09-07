@@ -26,6 +26,7 @@ const { computeScore } = await import('../src/lib/scoring');
 const { evidenceBand } = await import('../src/lib/evidence');
 const { labelForTopic } = await import('../src/lib/taxonomy');
 const { funStats } = await import('../src/lib/stats');
+const { reducedResult } = await import('../src/lib/reduced');
 
 const SNAPSHOT = process.env.SNAPSHOT;
 
@@ -38,7 +39,14 @@ it('calibrate', { timeout: 900_000, skip: !SNAPSHOT }, async () => {
 
     if (!mapped.ok) {
       const why = 'errorClass' in mapped ? mapped.errorClass : 'pending';
-      console.log(`\n@${handle}  ->  ${why}   (followers ${row.followers}, posts_count ${row.posts_count})`);
+      console.log(`\n@${handle}  ->  ${why}`);
+      if ('profile' in mapped && mapped.profile) {
+        const r = reducedResult(mapped.profile);
+        console.log(`  REDUCED RESULT`);
+        console.log(`  age ${r.accountAgeYears}y   ${r.profile.postsCount} posts (${r.postsPerYear}/yr)   ${r.profile.followers} followers   ratio ${r.followerRatio}   ${r.profile.isVerified ? 'verified' : ''}`);
+        console.log(`  topics from bio: ${r.topics.map(labelForTopic).join(', ') || '(none)'}`);
+        console.log(`  matched: ${r.matchedWords.join(' ') || '(none)'}`);
+      }
       continue;
     }
 

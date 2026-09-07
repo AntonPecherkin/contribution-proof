@@ -102,14 +102,15 @@ describe('resolveSnapshot', () => {
   it('returns no_posts_available when the profile is fine but posts is null', async () => {
     // The account exists and reports 97 posts. This is neither empty nor not-found.
     readyWith(noPosts);
-    await expect(brightDataProvider.resolveSnapshot('sd_abc')).resolves.toEqual({
-      ok: false, errorClass: 'no_posts_available',
-    });
+    const r = await brightDataProvider.resolveSnapshot('sd_abc');
+    expect(r).toMatchObject({ ok: false, errorClass: 'no_posts_available' });
+    // The profile must survive: it is the whole basis of the reduced result.
+    expect(r.ok === false && 'profile' in r && r.profile?.postsCount).toBe(97);
   });
 
   it('distinguishes an account with no posts from one we could not read', async () => {
     readyWith(empty);
-    await expect(brightDataProvider.resolveSnapshot('sd_abc')).resolves.toEqual({
+    await expect(brightDataProvider.resolveSnapshot('sd_abc')).resolves.toMatchObject({
       ok: false, errorClass: 'empty',
     });
   });

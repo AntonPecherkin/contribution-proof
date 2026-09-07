@@ -49,19 +49,39 @@ export type ProviderErrorClass =
   | 'timeout';
 
 /**
+ * Everything the provider knows about an account independently of its posts.
+ *
+ * It survives the case that matters most: when the embedded posts array comes back null -
+ * measured to happen for roughly a third of accounts, concentrated in the small ones - this
+ * is still fully populated. The bio in particular is text, and runs through the same
+ * classifier the posts do, which is what makes a reduced result possible instead of a dead
+ * end.
+ */
+export type ProfileSummary = {
+  handle: string;
+  displayName: string;
+  bio: string | null;
+  followers: number | null;
+  following: number | null;
+  postsCount: number | null;
+  /** ISO 8601, or null when the provider omits it. */
+  joinedAt: string | null;
+  isVerified: boolean;
+  location: string | null;
+  externalLink: string | null;
+};
+
+/**
  * A fetch outcome. Three arms, because the provider collects asynchronously: it hands back a
  * claim ticket rather than data, and that is neither success nor failure. Modelling it as
  * either is what pushes job queues into designs that do not need them.
+ *
+ * A failure may still carry the profile. Discarding it was throwing away the only thing we
+ * had for the accounts we most often cannot read.
  */
 export type ProfileResult =
-  | {
-      ok: true;
-      handle: string;
-      displayName: string;
-      followers: number | null;
-      posts: Post[];
-    }
-  | { ok: false; errorClass: ProviderErrorClass }
+  | { ok: true; profile: ProfileSummary; posts: Post[] }
+  | { ok: false; errorClass: ProviderErrorClass; profile?: ProfileSummary }
   | { ok: false; pending: true; snapshotId: string };
 
 export interface PostProvider {

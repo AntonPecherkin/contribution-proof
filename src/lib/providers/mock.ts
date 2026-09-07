@@ -1,6 +1,7 @@
-import { mapProfileRow, type RawProfile } from './mapping';
+import { mapProfileRow, toProfileSummary, type RawProfile } from './mapping';
 import type { PostProvider, ProfileResult } from './types';
 
+import noPosts from '../../../fixtures/brightdata/no_posts.json';
 import rich from '../../../fixtures/brightdata/rich.json';
 import thin from '../../../fixtures/brightdata/thin.json';
 
@@ -34,7 +35,12 @@ export const mockProvider: PostProvider = {
       case 'thinbuilder':
         return profile(thin, limit);
       case 'smallbuilder':
-        return { ok: false, errorClass: 'no_posts_available' };
+        // Carries the profile, so the reduced path is reachable offline.
+        return {
+          ok: false,
+          errorClass: 'no_posts_available',
+          profile: toProfileSummary((noPosts as RawProfile[])[0]),
+        };
       case 'emptybuilder':
         return { ok: false, errorClass: 'empty' };
       case 'lockedaccount':

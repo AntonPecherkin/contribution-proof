@@ -25,19 +25,24 @@ export type Classification = {
 };
 
 /**
- * Short keywords are ordinary English before they are jargon: "did", "token", "spec".
- * Anything under four characters must be a full standalone word, which keeps the useful
- * acronyms ("zk", "mev", "llm", "did") without matching "did we just".
+ * Short keywords are ordinary English before they are jargon, so anything up to four
+ * characters must match as a standalone word: "zk", "mev", "llm", "l2", "p95" all survive,
+ * while a word like "did" would match "did we just" and is therefore kept out of the
+ * taxonomy rather than defended against here.
+ *
+ * An earlier version also rejected short keywords containing a digit or a space, which
+ * silently discarded "l2", "ai", "p50", "p95" and "p99" — five of the most useful terms in
+ * the list. Curating the taxonomy is the right control; a blanket rule was not.
  */
 function hasKeyword(haystack: string, keyword: string): boolean {
-  if (keyword.length < 4 && !/^[a-z]+$/.test(keyword)) return false;
-  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const term = keyword.trim();
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   // Short tokens must stand alone on both sides; longer ones may prefix-match so that
   // "vulnerab" catches "vulnerability" and "vulnerable".
   const pattern =
-    keyword.length <= 4
+    term.length <= 4
       ? `\\b${escaped}\\b`
-      : /[a-z0-9]$/.test(keyword)
+      : /[a-z0-9]$/.test(term)
         ? `\\b${escaped}`
         : escaped;
   return new RegExp(pattern).test(haystack);

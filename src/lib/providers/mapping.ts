@@ -1,4 +1,4 @@
-import type { Post, ProfileResult } from './types';
+import type { Post, ProfileResult, ProfileSummary } from './types';
 
 /**
  * Pure mapping from the provider's profile row to our contract.
@@ -22,12 +22,35 @@ export type RawPost = {
 export type RawProfile = {
   id?: string | null;
   profile_name?: string | null;
+  biography?: string | null;
   followers?: number | null;
+  following?: number | null;
+  posts_count?: number | null;
+  date_joined?: string | null;
+  is_verified?: boolean | null;
+  location?: string | null;
+  external_link?: string | null;
   posts?: RawPost[] | null;
   error?: string | null;
   error_code?: string | null;
   warning?: string | null;
 };
+
+export function toProfileSummary(row: RawProfile): ProfileSummary {
+  const joined = row.date_joined ? new Date(row.date_joined) : null;
+  return {
+    handle: row.id ?? '',
+    displayName: row.profile_name ?? row.id ?? '',
+    bio: row.biography?.trim() || null,
+    followers: row.followers ?? null,
+    following: row.following ?? null,
+    postsCount: row.posts_count ?? null,
+    joinedAt: joined && !Number.isNaN(joined.getTime()) ? joined.toISOString() : null,
+    isVerified: row.is_verified === true,
+    location: row.location?.trim() || null,
+    externalLink: row.external_link?.trim() || null,
+  };
+}
 
 /** '…/status/123…' -> '123'. The only id available when post_id comes back null. */
 export const idFromUrl = (url: string | null | undefined): string | null =>
@@ -92,10 +115,12 @@ export function mapProfileRow(row: RawProfile, limit: number): ProfileResult {
   // The whole game. `posts: null` is neither an error nor an empty account: the profile came
   // back fine, reporting a real posts_count, and the array is null anyway. Measured to happen
   // reliably for small accounts, which at a developer event is the common case.
+  const profile = toProfileSummary(row);
+
   if (row.posts === null || row.posts === undefined) {
-    return { ok: false, errorClass: 'no_posts_available' };
+    return { ok: false, errorClass: 'no_posts_available', profile };
   }
-  if (row.posts.length === 0) return { ok: false, errorClass: 'empty' };
+  if (row.posts.length === 0) return { ok: false, errorClass: 'empty', profile };
 
   // Measured: the provider returns posts in no useful order, spanning years. Taking the
   // array as given would make "the latest N posts" mean "N arbitrary posts since 2018".
@@ -106,13 +131,7 @@ export function mapProfileRow(row: RawProfile, limit: number): ProfileResult {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, limit);
 
-  if (posts.length === 0) return { ok: false, errorClass: 'no_posts_available' };
+  if (posts.length === 0) return { ok: false, errorClass: 'no_posts_available', profile };
 
-  return {
-    ok: true,
-    handle: row.id ?? '',
-    displayName: row.profile_name ?? '',
-    followers: row.followers ?? null,
-    posts,
-  };
+  return { ok: true, profile, posts };
 }
