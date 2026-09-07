@@ -73,6 +73,16 @@ async function attempt(
  * showing nothing, because every number on the page was computed by us and none of it
  * depended on this call succeeding.
  */
+/**
+ * Swallowing the cause makes a failure here indistinguishable from a hundred others, and
+ * costs an hour every time something upstream changes. Log it; never surface it to a
+ * participant.
+ */
+function note(error: unknown): void {
+  const e = error as { status?: number; message?: string };
+  console.error(`[classify] ${e?.status ?? ''} ${e?.message?.slice(0, 300) ?? String(error)}`);
+}
+
 export async function classify(posts: readonly Post[]): Promise<ClassifyResult> {
   const anthropic = client();
   if (!anthropic) return { ok: false, errorClass: 'llm' };
@@ -81,13 +91,14 @@ export async function classify(posts: readonly Post[]): Promise<ClassifyResult> 
   try {
     const first = await attempt(anthropic, posts, 'low');
     if (first.ok) return first;
-  } catch {
-    // fall through to the retry
+  } catch (error) {
+    note(error);
   }
 
   try {
     return await attempt(anthropic, posts, 'medium');
-  } catch {
+  } catch (error) {
+    note(error);
     return { ok: false, errorClass: 'llm' };
   }
 }
