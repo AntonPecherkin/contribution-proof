@@ -15,7 +15,7 @@ const dependencies = vi.hoisted(() => ({
   getSettings: vi.fn<() => Promise<{
     analysisEnabled: boolean;
     turnstileEnabled: boolean;
-    primaryProvider: 'twitterapi' | 'mock';
+    primaryProvider: 'brightdata' | 'mock';
     demoMode: boolean;
     maxAnalysesPerEvent: number;
     perIpHourlyCap: number;
@@ -65,7 +65,7 @@ beforeEach(() => {
   dependencies.getSettings.mockResolvedValue({
     analysisEnabled: true,
     turnstileEnabled: false,
-    primaryProvider: 'twitterapi',
+    primaryProvider: 'brightdata',
     demoMode: false,
     maxAnalysesPerEvent: 5,
     perIpHourlyCap: 2,

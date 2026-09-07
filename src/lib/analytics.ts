@@ -21,10 +21,10 @@ type PropValue = string | number | boolean;
 
 const allowedPropValues: Record<string, ReadonlySet<PropValue>> = {
   latency_bucket: new Set(['0-2s', '2-10s', '10-30s', '30-60s', '60s+']),
-  lane: new Set(['warm', 'live']),
+  lane: new Set(['warm', 'cold']),
   evidence_band: new Set(['good', 'limited', 'directional', 'none']),
   error_class: new Set(['invalid_handle', 'private', 'empty', 'provider', 'timeout', 'llm']),
-  provider: new Set(['twitterapi', 'mock']),
+  provider: new Set(['brightdata', 'mock']),
   score_bucket: new Set(['0-200', '200-400', '400-600', '600-800', '800-1000']),
   opportunity_rank: new Set([1, 2, 3]),
 };

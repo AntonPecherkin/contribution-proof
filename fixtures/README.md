@@ -3,23 +3,26 @@
 Recorded provider responses. They let every task be built and tested with no network and no
 credentials (`MOCK=1`).
 
-## Recorded from a real response, 2026-09-07
+## Built from an observed response, 2026-09-07
 
-`twitterapi/` matches an actual observed response, not the published schema. **The two differ**
-— the documentation shows `tweets` at the top level; in reality they are nested under `data`:
+`brightdata/` mirrors the real structure of the X profile dataset: a profile row carrying an
+embedded `posts[]` array. Content is invented; only the shape is real. That is the right trade
+for a repository that becomes public — we need the structure, not a stranger's posts.
 
-```json
-{ "status": "success", "code": 0, "msg": "success",
-  "data": { "pin_tweet": null, "tweets": [ ... ] },
-  "has_next_page": false, "next_cursor": "..." }
-```
+The quirks below are all observed, not imagined, and each has a fixture:
 
-Content is invented; only the structure is real. That is the correct trade for a repository
-that becomes public: we need the shape, not a stranger's posts.
+| Fixture | What it captures |
+|---|---|
+| `rich.json` | An established account. **The first post carries only a URL and a view count** — everything else null. `views` is absent on most of the rest. |
+| `thin.json` | Three posts: a directional result. |
+| `no_posts.json` | **The important one.** The profile comes back fine, reporting 97 posts, and `posts` is `null` anyway. Measured to happen reliably for small accounts. |
+| `empty.json` | An account that genuinely has nothing. Different from the above and different copy. |
+| `not_found.json` / `private.json` | Row-level `error_code`. |
+| `pending.json` / `running.json` | The async trigger and an in-progress snapshot. |
+| `malformed.json` | Truncated JSON. |
 
-## The one thing these fixtures cannot express
+## What these fixtures cannot express
 
-`empty.json` and `not_found.json` are **byte-identical on purpose.** A handle that does not
-exist and an account that has never posted produce exactly the same response. Distinguishing
-them needs a second call to the user-info endpoint, which is why `C4` specifies one on the
-empty path. If you find yourself "fixing" the duplicate fixtures, read that section first.
+The dataset carries **no reply, repost or quote indicator**. Eligibility is approximated by a
+leading-mention heuristic and disclosed in the result. If you are tempted to add such a field
+to a fixture, it does not exist upstream and the code must not learn to expect it.

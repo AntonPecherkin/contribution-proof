@@ -43,10 +43,10 @@ Allowed prop keys:
 
 ```
 latency_bucket   '0-2s' | '2-10s' | '10-30s' | '30-60s' | '60s+'
-lane             'warm' | 'live'
+lane             'warm' | 'cold'
 evidence_band    'good' | 'limited' | 'directional' | 'none'
 error_class      the ProfileResult error classes, plus 'llm'
-provider         'twitterapi' | 'mock'
+provider         'brightdata' | 'mock'
 score_bucket     '0-200' | '200-400' | '400-600' | '600-800' | '800-1000'
 opportunity_rank 1 | 2 | 3
 ```
