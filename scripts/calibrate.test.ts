@@ -26,7 +26,7 @@ const { computeScore } = await import('../src/lib/scoring');
 const { evidenceBand } = await import('../src/lib/evidence');
 const { labelForTopic } = await import('../src/lib/taxonomy');
 const { funStats } = await import('../src/lib/stats');
-const { reducedResult } = await import('../src/lib/reduced');
+const { profileSignal } = await import('../src/lib/signal');
 
 const SNAPSHOT = process.env.SNAPSHOT;
 
@@ -41,11 +41,10 @@ it('calibrate', { timeout: 900_000, skip: !SNAPSHOT }, async () => {
       const why = 'errorClass' in mapped ? mapped.errorClass : 'pending';
       console.log(`\n@${handle}  ->  ${why}`);
       if ('profile' in mapped && mapped.profile) {
-        const r = reducedResult(mapped.profile);
-        console.log(`  REDUCED RESULT`);
-        console.log(`  age ${r.accountAgeYears}y   ${r.profile.postsCount} posts (${r.postsPerYear}/yr)   ${r.profile.followers} followers   ratio ${r.followerRatio}   ${r.profile.isVerified ? 'verified' : ''}`);
-        console.log(`  topics from bio: ${r.topics.map(labelForTopic).join(', ') || '(none)'}`);
-        console.log(`  matched: ${r.matchedWords.join(' ') || '(none)'}`);
+        const r = profileSignal(mapped.profile);
+        console.log(`  PROFILE SIGNAL — "${r.headline}"`);
+        for (const sig of r.signals) console.log(`    ${sig.label.padEnd(14)} ${sig.detail}`);
+        console.log(`    topics from bio: ${r.topics.map(labelForTopic).join(', ') || '(none)'}`);
       }
       continue;
     }
