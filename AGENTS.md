@@ -70,6 +70,9 @@ export type ScoreInput = {
   explanationRatings: number[];     // 0..1, one per relevant post
   activeWeeks: number;
   relevantCountsByWeek: number[];
+  // Totals over RELEVANT posts only - the response to the contribution, not to the
+  // account. Passing account-wide totals would score a popular non-technology account
+  // for reach it did not earn here. null means not reported; it is not zero.
   viewsTotal: number | null;
   conversationsTotal: number | null;
 };
