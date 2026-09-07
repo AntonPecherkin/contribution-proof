@@ -1,27 +1,37 @@
 import { TAXONOMY } from './taxonomy';
 
 /**
- * Contribution opportunities.
+ * Who to talk to at the event.
  *
- * Matching is deterministic topic overlap — no ranking model, no hidden boost. A sponsored
- * entry is labelled and otherwise competes on the same terms as everything else; a booth is
- * exactly where a rigged recommendation would be noticed.
+ * These are the speakers and the projects they work on, matched to a participant by topic
+ * overlap. That reframing matters: "go contribute to this repository" is advice someone
+ * acts on next month, whereas "Nikki from Superteam MY is here and works on what you post
+ * about" is advice they can act on in the next ten minutes, in the room they are standing
+ * in.
  *
- * The entries below are a WORKING EXAMPLE SET. Replace them with the event's real projects
- * before the day: these are placeholders chosen to exercise the matcher across the taxonomy,
- * and the "needs" are generic rather than researched. Shipping them as-is would put claims
- * about other people's projects in front of attendees.
+ * Matching is deterministic topic overlap with no hidden boost. A sponsor is labelled and
+ * otherwise competes on the same terms; a booth is exactly where a rigged recommendation
+ * would be noticed.
+ *
+ * Topics are assigned from each project's public purpose and its workshop subject. Entries
+ * marked `unverified` were inferred and should be confirmed before the event - see the note
+ * at the bottom of this file.
  */
 
 export type Project = {
   id: string;
+  /** The project or company. */
   name: string;
+  /** The person representing it at the event. */
+  speaker: string;
+  /** Their session, verbatim from the schedule where there is one. */
+  session: string;
   url: string;
   /** Topic ids from the taxonomy. */
   topics: string[];
-  /** What contributors can actually do. Kept short; it is read at a glance. */
-  needs: string;
   sponsor: boolean;
+  /** True where the topic mapping is inferred rather than confirmed. */
+  unverified?: boolean;
 };
 
 export type Match = {
@@ -31,27 +41,84 @@ export type Match = {
   strength: 'strong' | 'good' | 'possible';
 };
 
-export const CATALOG_VERSION = '0.1.0-example';
+export const CATALOG_VERSION = '1.0.0-borneo';
 
 export const CATALOG: readonly Project[] = [
-  { id: 'p-zk', name: 'Example ZK Toolkit', url: 'https://example.org/zk',
-    topics: ['cryptography', 'smart-contracts'], needs: 'Docs and worked examples', sponsor: false },
-  { id: 'p-scale', name: 'Example Rollup Explorer', url: 'https://example.org/rollup',
-    topics: ['scaling', 'consensus', 'devtools'], needs: 'Frontend and API work', sponsor: false },
-  { id: 'p-agents', name: 'Example Agent Harness', url: 'https://example.org/agents',
-    topics: ['agents', 'language-models', 'devtools'], needs: 'Evaluation harnesses', sponsor: false },
-  { id: 'p-data', name: 'Example Vector Bench', url: 'https://example.org/vector',
-    topics: ['data', 'ml-systems', 'performance'], needs: 'Benchmarks and datasets', sponsor: false },
-  { id: 'p-sec', name: 'Example Audit Commons', url: 'https://example.org/audit',
-    topics: ['security', 'smart-contracts'], needs: 'Review and write-ups', sponsor: false },
-  { id: 'p-pay', name: 'Example Payments SDK', url: 'https://example.org/pay',
-    topics: ['payments', 'identity'], needs: 'SDK examples and integrations', sponsor: true },
-  { id: 'p-creator', name: 'Example Creator Index', url: 'https://example.org/creator',
-    topics: ['creator-economy', 'prediction'], needs: 'Data collection and analysis', sponsor: false },
-  { id: 'p-os', name: 'Example Spec Registry', url: 'https://example.org/spec',
-    topics: ['open-source', 'devtools'], needs: 'Specification review', sponsor: false },
+  { id: 'elfa', name: 'Elfa AI', speaker: 'Tristan & Ming Yang',
+    session: 'Finding real problems — user research & market framing',
+    url: 'https://elfa.ai', sponsor: false,
+    topics: ['language-models', 'data', 'prediction', 'creator-economy'] },
+
+  { id: 'superteam-my', name: 'Superteam MY', speaker: 'Nikki',
+    session: 'Contentmaxxing', url: 'https://superteam.fun', sponsor: false,
+    topics: ['open-source', 'creator-economy', 'devtools'] },
+
+  { id: 'meteora', name: 'Meteora', speaker: 'Vesper',
+    session: 'Meteora Ecosystem — Opportunities for Everyone',
+    url: 'https://meteora.ag', sponsor: false,
+    topics: ['mechanism-design', 'smart-contracts', 'scaling'] },
+
+  { id: 'monkedao', name: 'MonkeDAO', speaker: 'Jemmy',
+    session: 'MonkeDAO — community-led building',
+    url: 'https://monkedao.io', sponsor: false,
+    topics: ['open-source', 'consensus', 'mechanism-design', 'creator-economy'] },
+
+  { id: 'sanctum', name: 'Sanctum', speaker: 'Nic',
+    session: 'Sanctum', url: 'https://sanctum.so', sponsor: false,
+    topics: ['consensus', 'mechanism-design', 'payments'] },
+
+  { id: 'getblock', name: 'GetBlock', speaker: 'Vasily',
+    session: 'GetBlock', url: 'https://getblock.io', sponsor: false,
+    topics: ['scaling', 'devtools', 'data'] },
+
+  { id: 'virtuals', name: 'Virtuals', speaker: 'Joey',
+    session: 'Building the Agent Economy — AI agents & autonomous payments via EconomyOS',
+    url: 'https://virtuals.io', sponsor: false,
+    topics: ['agents', 'language-models', 'payments', 'mechanism-design'] },
+
+  { id: 'rarible', name: 'Impossible Finance / Rarible', speaker: 'Shuen Rui',
+    session: 'Go-to-market done right', url: 'https://rarible.com', sponsor: false,
+    topics: ['smart-contracts', 'creator-economy'] },
+
+  { id: 'kyzzen', name: 'Kyzzen', speaker: 'OhMeOhMy',
+    session: 'Kyzzen', url: 'https://kyzzen.io', sponsor: false, unverified: true,
+    topics: ['data', 'creator-economy', 'mechanism-design'] },
+
+  { id: 'cradle', name: 'Cradle', speaker: 'Faiz',
+    session: 'Cradle', url: '', sponsor: false, unverified: true,
+    topics: ['open-source', 'devtools'] },
+
+  { id: 'content', name: 'Content', speaker: 'Joyce',
+    session: 'Contentmaxxing', url: '', sponsor: false, unverified: true,
+    topics: ['creator-economy', 'prediction'] },
+
+  { id: 'superscrypt', name: 'Superscrypt', speaker: 'Jacob',
+    session: 'What investors look for — what kills a pitch in 30 seconds',
+    url: 'https://superscrypt.xyz', sponsor: false,
+    topics: ['open-source', 'mechanism-design'] },
+
+  { id: 'no-limit', name: 'No Limit Holdings', speaker: 'Chris',
+    session: 'No Limit Holdings', url: '', sponsor: false, unverified: true,
+    topics: ['mechanism-design', 'open-source'] },
 ] as const;
 
+/*
+ * BEFORE THE EVENT
+ *
+ * Confirm the entries marked `unverified` — Cradle, Kyzzen, Content, No Limit Holdings —
+ * where the topic mapping was inferred from a name and a session title alone. A wrong
+ * mapping sends someone to the wrong table, which is worse than sending them nowhere.
+ *
+ * Fill the empty `url` fields, and set `sponsor: true` on whoever is actually sponsoring.
+ * Nothing here reads sponsorship from anywhere else.
+ *
+ * COVERAGE: 12 of 17 topics have someone to talk to. Nobody covers cryptography and
+ * zero-knowledge, machine learning systems, security and auditing, hardware and performance,
+ * or decentralized identity and privacy. A participant whose power topics fall entirely in
+ * that gap receives no opportunities at all - which is honest, but it is a blank space on
+ * their result page. Either add people who cover those areas, or accept that a
+ * security-focused attendee will be told there is nobody here for them.
+ */
 const KNOWN = new Set(TAXONOMY.map((t) => t.id));
 
 function strengthOf(overlapCount: number, participantTopics: number): Match['strength'] {
