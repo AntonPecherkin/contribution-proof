@@ -71,6 +71,13 @@ npx vitest run tests/analytics.test.ts
 Cover: a well-formed insert; a disallowed prop key silently dropped; a database error
 swallowed without throwing; `track` resolving even when the client rejects.
 
+## Database access
+
+Import `getDb()` from `src/lib/db.ts` and call it inside your functions - never at module
+scope. The client is memoized on first use, so a test can set `process.env` before the first
+call and use `resetDbForTests()` between cases. This is the same rule the provider adapters
+follow, and it is why your tests can run with no credentials.
+
 ## Constraints
 
 - Server-only. `import 'server-only'`.
