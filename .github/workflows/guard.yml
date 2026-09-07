@@ -29,6 +29,8 @@ jobs:
             NOTICE
             AGENTS.md
             CLAUDE.md
+            docs/SPEC.md
+            docs/DISPATCH.md
             src/lib/providers/types.ts
           "
           BASE="origin/${{ github.base_ref }}"

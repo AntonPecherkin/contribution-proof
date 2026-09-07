@@ -8,6 +8,10 @@ The brief for every agent working in this repository. Read it before touching a 
 evidence-bounded 0–1000 Technology Contribution Result. Built in 48 hours, and
 **intended to become a public open-source repository.**
 
+**`docs/SPEC.md` is the product specification** — what to build, and what was deliberately
+left out. Read it before any task that touches product behaviour. If a summary of this
+project disagrees with it, the file wins.
+
 ## Hard boundaries — non-negotiable
 
 1. **This repository must be publishable as-is.** Everything you commit — code, comments,
@@ -167,4 +171,4 @@ a task seems to require one, say so in the PR rather than asking for a secret.
 - [ ] No secret, no private-repo content, no raw post text persisted.
 - [ ] PR description says what you did and flags every assumption you had to make.
 
-Task briefs: `docs/tasks/`.
+Product spec: `docs/SPEC.md`. Dispatch: `docs/DISPATCH.md`. Task briefs: `docs/tasks/`.

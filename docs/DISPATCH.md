@@ -23,7 +23,8 @@ How the two agents work this repository in parallel without colliding.
 Cheap insurance. Read-only, no branch, no PR. If the answers come back wrong, the briefs
 need fixing before six sandboxes act on them.
 
-> Read `AGENTS.md`, then `docs/tasks/README.md`, then every brief in `docs/tasks/`.
+> Read `AGENTS.md`, then `docs/SPEC.md`, then `docs/tasks/README.md`, then every brief in
+> `docs/tasks/`.
 > Do not write any code or open a PR yet.
 >
 > Answer, briefly:
@@ -33,7 +34,9 @@ need fixing before six sandboxes act on them.
 >    `errorClass: 'provider'`, and why does one of them never get retried?
 > 4. A provider payload has no `views` field. What value goes into `Post.views`, and why
 >    does it matter downstream?
-> 5. What is the definition of done, and who merges your PR?
+> 5. Name three things listed under "Rejected - do not reintroduce" in `docs/SPEC.md`,
+>    and say what is built instead of each.
+> 6. What is the definition of done, and who merges your PR?
 
 Question 4 is the one that matters most. If it answers `0`, stop and re-read the brief with
 it — that single mistake silently corrupts the score for every account whose metrics the
@@ -44,7 +47,7 @@ provider fails to return.
 The briefs live in the repo, so a dispatch is two lines. Do not paste brief content into the
 prompt — the repo is the context, and a pasted copy drifts from the committed one.
 
-> Read `AGENTS.md`, then `docs/tasks/<TASK>.md`. Implement that task exactly as specified.
+> Read `AGENTS.md`, then `docs/SPEC.md`, then `docs/tasks/<TASK>.md`. Implement that task exactly as specified.
 > Work on branch `task/<id>-<slug>`. Run the acceptance commands, satisfy every item in the
 > definition of done, and open a PR. Do not merge it.
 
