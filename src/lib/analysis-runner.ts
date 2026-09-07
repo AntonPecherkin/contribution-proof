@@ -81,6 +81,9 @@ async function complete(id: string, result: PublicResult, lane: 'warm' | 'cold')
       eligible_post_count: result.kind === 'analysis' ? result.eligibleCount : null,
       evidence_band: result.kind === 'analysis' ? result.evidence : null,
       posts_technology: result.kind === 'analysis' ? result.technologyCount : null,
+      // The board sums this column rather than scanning jsonb, so it has to be written here.
+      // Without it every room total read "Not available" while the result page showed views.
+      views_total: result.kind === 'analysis' ? result.stats.totalViews : null,
       topics: result.kind === 'analysis' ? result.powerTopics : result.signal.topics,
       result_kind: result.kind,
       result,
