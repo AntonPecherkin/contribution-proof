@@ -1,0 +1,86 @@
+{
+  "tweets": [
+    {
+      "id": "1840000000000000",
+      "type": "tweet",
+      "url": "https://x.com/devbuilder/status/1840000000000000",
+      "text": "Spent the weekend on the zk-SNARK trusted setup literature. The part nobody explains well: the toxic waste is not destroyed, it is made unrecoverable by ensuring no single party ever holds it.",
+      "source": "Twitter Web App",
+      "lang": "en",
+      "createdAt": "Thu Aug 20 09:00:00 +0000 2026",
+      "retweetCount": 2,
+      "replyCount": 1,
+      "likeCount": 12,
+      "quoteCount": 0,
+      "bookmarkCount": 3,
+      "isReply": false,
+      "inReplyToId": null,
+      "conversationId": "1840000000000000",
+      "quoted_tweet": null,
+      "retweeted_tweet": null,
+      "author": {
+        "id": "1329361473987108864",
+        "userName": "devbuilder",
+        "name": "Dev Builder",
+        "followers": 4821
+      },
+      "viewCount": 900
+    },
+    {
+      "id": "1840000000000001",
+      "type": "tweet",
+      "url": "https://x.com/devbuilder/status/1840000000000001",
+      "text": "A thread on why rollup data availability is the real bottleneck, not execution. 1/6",
+      "source": "Twitter Web App",
+      "lang": "en",
+      "createdAt": "Tue Aug 18 09:00:00 +0000 2026",
+      "retweetCount": 3,
+      "replyCount": 2,
+      "likeCount": 19,
+      "quoteCount": 1,
+      "bookmarkCount": 4,
+      "isReply": false,
+      "inReplyToId": null,
+      "conversationId": "1840000000000001",
+      "quoted_tweet": null,
+      "retweeted_tweet": null,
+      "author": {
+        "id": "1329361473987108864",
+        "userName": "devbuilder",
+        "name": "Dev Builder",
+        "followers": 4821
+      },
+      "viewCount": 1330
+    },
+    {
+      "id": "1840000000000002",
+      "type": "tweet",
+      "url": "https://x.com/devbuilder/status/1840000000000002",
+      "text": "Shipped a small thing: a Rust crate that verifies Merkle inclusion proofs in 40 lines.",
+      "source": "Twitter Web App",
+      "lang": "en",
+      "createdAt": "Sun Aug 16 09:00:00 +0000 2026",
+      "retweetCount": 4,
+      "replyCount": 3,
+      "likeCount": 26,
+      "quoteCount": 2,
+      "bookmarkCount": 5,
+      "isReply": false,
+      "inReplyToId": null,
+      "conversationId": "1840000000000002",
+      "quoted_tweet": null,
+      "retweeted_tweet": null,
+      "author": {
+        "id": "1329361473987108864",
+        "userName": "devbuilder",
+        "name": "Dev Builder",
+        "followers": 4821
+      },
+      "viewCount": 1760
+    }
+  ],
+  "has_next_page": false,
+  "next_cursor": "",
+  "status": "success",
+  "message": ""
+}
