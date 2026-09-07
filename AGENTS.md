@@ -125,6 +125,12 @@ Neither agent merges its own PR.
 
 Each of us is the other's best reviewer precisely where we are individually weakest.
 
+**When a review changes a contract, the brief update is a separate commit on `main`, never
+part of the task PR.** Briefs and boundary docs are protected, so editing one inside a task
+branch turns `protected-files` red and invites merging past a failing check — which defeats
+the only part of this process a machine actually enforces. Land the code, then correct the
+brief.
+
 ## Conventions
 
 - TypeScript strict. No `any`. No `as` casts to force a shape — model the real one.
