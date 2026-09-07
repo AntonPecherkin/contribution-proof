@@ -1,0 +1,17 @@
+services:
+  contribution-proof:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      # Host-local only; nginx terminates TLS and proxies to it.
+      - "127.0.0.1:3020:3020"
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+      BRIGHTDATA_API_KEY: ${BRIGHTDATA_API_KEY}
+      BRIGHTDATA_X_PROFILE_DATASET: ${BRIGHTDATA_X_PROFILE_DATASET}
+      # MOCK=1 serves fixtures with no network and no database - the event-day fallback
+      # if collection fails and you need the booth to keep working.
+      MOCK: ${MOCK:-}
+    restart: unless-stopped

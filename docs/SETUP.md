@@ -51,27 +51,62 @@ npm run dev          # real database
 MOCK=1 npm run dev   # fixtures, no database, no keys
 ```
 
-## 3. Vercel
+## 3. Deploy to the VPS
 
-1. Import the repository at [vercel.com/new](https://vercel.com/new).
-2. **Settings → Environment Variables**, for all environments:
+Self-hosted rather than serverless, and not only for cost. Bright Data collection takes
+85-140 seconds, and `after()` on a long-lived process simply finishes its work instead of
+racing a function freeze - which is the failure the stale-row revival exists to catch.
 
-   | Name | |
-   |---|---|
-   | `SUPABASE_URL` | |
-   | `SUPABASE_SECRET_KEY` | the Secret key, not Publishable |
-   | `BRIGHTDATA_API_KEY` | |
-   | `BRIGHTDATA_X_PROFILE_DATASET` | `gd_lwxmeb2u1cniijd7t4` |
+On the server, matching the shape used for the other services here:
 
-   **Never prefix any of these `NEXT_PUBLIC_`** — that ships the value to every visitor.
+```bash
+git clone https://github.com/AntonPecherkin/contribution-proof.git
+cd contribution-proof
+```
 
-3. Deploy.
+Create `.env` beside `docker-compose.yml` - compose reads it automatically:
+
+```
+SUPABASE_URL=
+SUPABASE_SECRET_KEY=
+BRIGHTDATA_API_KEY=
+BRIGHTDATA_X_PROFILE_DATASET=gd_lwxmeb2u1cniijd7t4
+```
+
+Then:
+
+```bash
+docker compose up -d --build
+curl -s localhost:3020/api/events/hackathon-2026/board   # should be JSON
+```
+
+Add `nginx.conf` to the site config, point a subdomain at it, and issue a certificate:
+
+```bash
+sudo certbot --nginx -d proof.contentdao.app
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**The proxy timeouts in `nginx.conf` are load-bearing.** A default 60-second `proxy_read_timeout`
+cuts the first request of every cold analysis, because collection routinely runs past it.
+
+**`X-Forwarded-For` is also load-bearing** - the rate limiter hashes it, and without the header
+every visitor shares one bucket and the tenth person of the day is refused.
+
+### Redeploying
+
+```bash
+git pull --ff-only && docker compose up -d --no-deps --build contribution-proof
+```
+
+The image carries no secrets: every key is read at call time, so the same image runs
+anywhere and rebuilding never bakes a credential in.
 
 ## 4. Check it
 
 ```
-/api/events/hackathon-2026/board     → JSON, not an error
-/board/hackathon-2026                → the room board
+https://proof.contentdao.app/api/events/hackathon-2026/board   → JSON
+https://proof.contentdao.app/board/hackathon-2026              → the room board
 ```
 
 An empty board with `0 builders` is success: the database answered and the room is empty.
