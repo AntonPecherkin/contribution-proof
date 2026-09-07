@@ -15,7 +15,7 @@ import { clearSettingsCache, getSettings } from '../src/lib/settings';
 const defaults = {
   analysisEnabled: true,
   turnstileEnabled: false,
-  primaryProvider: 'twitterapi',
+  primaryProvider: 'brightdata',
   demoMode: false,
   maxAnalysesPerEvent: 500,
   perIpHourlyCap: 10,

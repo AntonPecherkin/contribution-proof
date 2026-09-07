@@ -5,7 +5,7 @@ import { getDb } from './db';
 export type Settings = {
   analysisEnabled: boolean;
   turnstileEnabled: boolean;
-  primaryProvider: 'twitterapi' | 'mock';
+  primaryProvider: 'brightdata' | 'mock';
   demoMode: boolean;
   maxAnalysesPerEvent: number;
   perIpHourlyCap: number;
@@ -16,7 +16,7 @@ const CACHE_TTL_MS = 30_000;
 const DEFAULTS: Settings = {
   analysisEnabled: true,
   turnstileEnabled: false,
-  primaryProvider: 'twitterapi',
+  primaryProvider: 'brightdata',
   demoMode: false,
   maxAnalysesPerEvent: 500,
   perIpHourlyCap: 10,
@@ -51,7 +51,7 @@ function parseNonNegativeInteger(value: unknown, fallback: number): number {
 function parseProvider(value: unknown): Settings['primaryProvider'] {
   if (typeof value !== 'string') return DEFAULTS.primaryProvider;
   const normalized = value.trim().toLowerCase();
-  return normalized === 'twitterapi' || normalized === 'mock'
+  return normalized === 'brightdata' || normalized === 'mock'
     ? normalized
     : DEFAULTS.primaryProvider;
 }
