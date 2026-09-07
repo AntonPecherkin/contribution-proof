@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 import type { BoardPayload, BoardRow } from '../../../lib/board';
@@ -67,7 +68,10 @@ export default function BoardView({ slug }: { slug: string }) {
   return (
     <main className="board">
       <header className="board-head">
-        <p className="board-eyebrow">This room has analysed</p>
+        <div className="board-brand">
+          <Image src="/logo.png" alt="" width={96} height={96} priority />
+          <p className="board-eyebrow">This room has analysed</p>
+        </div>
         <dl className="board-totals">
           <div><dt>technology posts</dt><dd>{data ? compact(data.technologyPosts) : '—'}</dd></div>
           <div><dt>public views</dt><dd>{data?.totalViews != null ? compact(data.totalViews) : 'Not available'}</dd></div>

@@ -16,7 +16,7 @@
 
   height: 100vh;
   overflow: hidden;
-  padding: 4vh 4vw;
+  padding: 3vh 4vw;
   background: var(--bg);
   color: #f6f6f6;
   font-family: Inter, system-ui, sans-serif;
@@ -25,8 +25,24 @@
   gap: 2.4vh;
 }
 
+/*
+ * The mark sits on the baseline of the eyebrow rather than above it, so it reads as part of
+ * the same line from across a room instead of as a second element competing for attention.
+ */
+.board-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.2vw;
+  margin-bottom: 1.4vh;
+}
+.board-brand img {
+  width: 3.6vw;
+  height: 3.6vw;
+  object-fit: contain;
+}
+
 .board-eyebrow {
-  margin: 0 0 2vh;
+  margin: 0;
   font-size: 1.6vw;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -41,7 +57,7 @@
 .board-totals div { display: flex; flex-direction: column-reverse; }
 .board-totals dd {
   margin: 0;
-  font-size: 5.6vw;
+  font-size: 5vw;
   font-weight: 700;
   line-height: 1;
   color: var(--yellow);
@@ -61,7 +77,8 @@
   grid-template-columns: 1.3fr 1fr;
   gap: 4vw;
   border-top: 1px solid var(--line);
-  padding-top: 3vh;
+  padding-top: 2vh;
+  min-height: 0;
 }
 .board-columns h2 {
   margin: 0 0 1.5vh;
@@ -101,6 +118,6 @@
   text-transform: uppercase;
 }
 
-.board-foot { border-top: 1px solid var(--line); padding-top: 2vh; }
+.board-foot { border-top: 1px solid var(--line); padding-top: 1.6vh; flex-shrink: 0; }
 .board-topics { margin: 0 0 0.6vh; font-size: 1.5vw; color: var(--purple); }
 .board-note { margin: 0; font-size: 1.1vw; color: var(--muted); }
