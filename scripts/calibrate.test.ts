@@ -42,7 +42,7 @@ it('calibrate', { timeout: 900_000, skip: !SNAPSHOT }, async () => {
       console.log(`\n@${handle}  ->  ${why}`);
       if ('profile' in mapped && mapped.profile) {
         const r = profileSignal(mapped.profile);
-        console.log(`  PROFILE SCORE ${r.profileScore}/100 — "${r.headline}"`);
+        console.log(`  PROFILE SCORE ${r.profileScore} — "${r.headline}"`);
         console.log(`    topics=${r.components.topics} tenure=${r.components.tenure} cadence=${r.components.cadence} presence=${r.components.presence}`);
         for (const sig of r.signals) console.log(`    ${sig.label.padEnd(14)} ${sig.detail}`);
         console.log(`    topics from bio: ${r.topics.map(labelForTopic).join(', ') || '(none)'}`);

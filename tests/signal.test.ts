@@ -56,19 +56,21 @@ describe('profileSignal', () => {
     expect(r.followerRatio).toBeNull();
   });
 
-  it('scores out of 100, never out of 1000', () => {
-    // The different scale IS the honesty mechanism: 72 beside 820 cannot be mistaken for
-    // the same measurement, where 300 beside 820 invites exactly that confusion.
+  it('scores on the same 0-1000 range as the Contribution Score', () => {
     const r = profileSignal(profile({ bio: 'rust, zk proofs, smart contracts' }), NOW);
     expect(r.profileScore).toBeGreaterThan(0);
-    expect(r.profileScore).toBeLessThanOrEqual(100);
+    expect(r.profileScore).toBeLessThanOrEqual(1000);
+  });
+
+  it('rounds to the nearest ten, so neither score looks more precise than the other', () => {
+    expect(profileSignal(profile({ bio: 'solana rust zk' }), NOW).profileScore % 10).toBe(0);
   });
 
   it('sums its visible components exactly', () => {
     const r = profileSignal(profile({ bio: 'solana rust zk' }), NOW);
     const { topics, tenure, cadence, presence } = r.components;
-    expect(topics + tenure + cadence + presence).toBe(r.profileScore);
-    for (const v of [topics, tenure, cadence, presence]) expect(v).toBeLessThanOrEqual(25);
+    expect(Math.round((topics + tenure + cadence + presence) / 10) * 10).toBe(r.profileScore);
+    for (const v of [topics, tenure, cadence, presence]) expect(v).toBeLessThanOrEqual(250);
   });
 
   it('still scores when facts are missing, rather than refusing', () => {
