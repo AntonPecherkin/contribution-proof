@@ -97,9 +97,13 @@ export function mapProfileRow(row: RawProfile, limit: number): ProfileResult {
   }
   if (row.posts.length === 0) return { ok: false, errorClass: 'empty' };
 
+  // Measured: the provider returns posts in no useful order, spanning years. Taking the
+  // array as given would make "the latest N posts" mean "N arbitrary posts since 2018".
+  // Sort before slicing so the window is at least the newest ones available.
   const posts = row.posts
     .map(toPost)
     .filter((p): p is Post => p !== null)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, limit);
 
   if (posts.length === 0) return { ok: false, errorClass: 'no_posts_available' };

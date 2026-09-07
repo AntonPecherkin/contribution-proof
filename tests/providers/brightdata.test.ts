@@ -166,3 +166,24 @@ describe('post mapping', () => {
     expect(looksLikeReply('email me at @ the usual place')).toBe(false);
   });
 });
+
+describe('ordering', () => {
+  it('returns the newest posts, because the provider does not sort', async () => {
+    // Measured: the raw array spans years in no useful order. Without a sort, "the latest
+    // 20 posts" would silently mean "20 arbitrary posts since 2018".
+    const shuffled = [{
+      id: 'devbuilder', profile_name: 'Dev', followers: 1,
+      posts: [
+        { post_id: '1', description: 'old', date_posted: '2019-01-01T00:00:00.000Z' },
+        { post_id: '2', description: 'newest', date_posted: '2026-08-01T00:00:00.000Z' },
+        { post_id: '3', description: 'middle', date_posted: '2023-05-05T00:00:00.000Z' },
+      ],
+    }];
+    fetchMock
+      .mockResolvedValueOnce(json({ status: 'ready' }))
+      .mockResolvedValueOnce(json(shuffled));
+    const r = await brightDataProvider.resolveSnapshot('sd_abc');
+    if (!r.ok) throw new Error('expected success');
+    expect(r.posts.map((p) => p.text)).toEqual(['newest', 'middle', 'old']);
+  });
+});
