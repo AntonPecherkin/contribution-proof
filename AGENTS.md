@@ -53,13 +53,18 @@ export type Post = {
   isQuote: boolean;
 };
 
+export type ProviderErrorClass =
+  | 'invalid_handle' | 'private' | 'no_posts_available' | 'empty' | 'provider' | 'timeout';
+
 export type ProfileResult =
   | { ok: true; handle: string; displayName: string; followers: number | null; posts: Post[] }
-  | { ok: false; errorClass: 'invalid_handle' | 'private' | 'empty' | 'provider' | 'timeout' };
+  | { ok: false; errorClass: ProviderErrorClass }
+  | { ok: false; pending: true; snapshotId: string };   // collection is asynchronous
 
 export interface PostProvider {
-  name: 'twitterapi' | 'mock';
+  name: 'brightdata' | 'mock';
   fetchRecentPosts(handle: string, limit: number): Promise<ProfileResult>;
+  resolveSnapshot(snapshotId: string): Promise<ProfileResult>;
 }
 
 // src/lib/scoring.ts
@@ -96,7 +101,7 @@ description instead.
 | Repo scaffold, CI, migrations | Codex |
 | Contracts, fixtures, and the failing tests | Claude |
 | `src/lib/scoring.ts`, `normalize.ts`, `evidence.ts` | Codex — one task each |
-| `src/lib/providers/twitterapi.ts`, `index.ts` | Codex |
+| `src/lib/providers/brightdata.ts`, `index.ts` | Codex |
 | `src/lib/{settings,ratelimit,analytics,catalog}.ts` | Codex — one task each |
 | `scripts/prewarm.mjs`, `src/app/api/share/[id]/` | Codex |
 | `tests/**` — Playwright smoke | Codex |

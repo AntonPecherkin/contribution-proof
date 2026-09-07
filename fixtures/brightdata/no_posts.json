@@ -1,0 +1,30 @@
+[
+  {
+    "x_id": "1329361473987108864",
+    "url": "https://x.com/smallbuilder",
+    "id": "smallbuilder",
+    "profile_name": "Dev Builder",
+    "biography": "Building things and writing about why they break.",
+    "is_verified": false,
+    "profile_image_link": "https://pbs.twimg.com/profile_images/1/x.jpg",
+    "external_link": null,
+    "date_joined": "2020-11-19T09:50:59.247Z",
+    "following": 587,
+    "followers": 186,
+    "subscriptions": 0,
+    "location": "Singapore",
+    "birth_date": null,
+    "posts_count": 97,
+    "posts": null,
+    "suggested_profiles": null,
+    "is_business_account": false,
+    "is_government_account": false,
+    "category_name": null,
+    "max_number_of_posts": null,
+    "banner_image": null,
+    "timestamp": "2026-09-07T03:42:58.218Z",
+    "input": {
+      "url": "https://x.com/smallbuilder"
+    }
+  }
+]

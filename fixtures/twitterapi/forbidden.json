@@ -1,5 +1,0 @@
-{
-  "error": "Forbidden",
-  "message": "API key required. Please include x-api-key in your request header.",
-  "code": -1
-}

@@ -41,11 +41,18 @@ export type Post = {
 export type ProviderErrorClass =
   | 'invalid_handle'
   | 'private'
+  /** The account exists and has posted, but the provider returned no posts for it. */
+  | 'no_posts_available'
+  /** The account genuinely has nothing to analyze. */
   | 'empty'
   | 'provider'
   | 'timeout';
 
-/** A fetch outcome. Success, or a classified failure. Nothing else. */
+/**
+ * A fetch outcome. Three arms, because the provider collects asynchronously: it hands back a
+ * claim ticket rather than data, and that is neither success nor failure. Modelling it as
+ * either is what pushes job queues into designs that do not need them.
+ */
 export type ProfileResult =
   | {
       ok: true;
@@ -54,20 +61,30 @@ export type ProfileResult =
       followers: number | null;
       posts: Post[];
     }
-  | { ok: false; errorClass: ProviderErrorClass };
+  | { ok: false; errorClass: ProviderErrorClass }
+  | { ok: false; pending: true; snapshotId: string };
 
 export interface PostProvider {
-  readonly name: 'twitterapi' | 'mock';
+  readonly name: 'brightdata' | 'mock';
   /** Never throws. Every failure is a returned ProfileResult. */
   fetchRecentPosts(handle: string, limit: number): Promise<ProfileResult>;
+  /** Collection is asynchronous: resolve a snapshot handed back by fetchRecentPosts. */
+  resolveSnapshot(snapshotId: string): Promise<ProfileResult>;
 }
 
 /** Narrowing helpers, so call sites read as intent rather than shape-poking. */
 export const isOk = (r: ProfileResult): r is Extract<ProfileResult, { ok: true }> => r.ok;
+export const isPending = (
+  r: ProfileResult,
+): r is Extract<ProfileResult, { pending: true }> => !r.ok && 'pending' in r;
 export const isFailure = (
   r: ProfileResult,
-): r is Extract<ProfileResult, { errorClass: ProviderErrorClass }> => !r.ok;
+): r is Extract<ProfileResult, { errorClass: ProviderErrorClass }> =>
+  !r.ok && 'errorClass' in r;
 
 /** These three mean "nothing to analyze", not "something went wrong". Do not retry them. */
 export const isAnswerNotFailure = (e: ProviderErrorClass): boolean =>
-  e === 'invalid_handle' || e === 'private' || e === 'empty';
+  e === 'invalid_handle' ||
+  e === 'private' ||
+  e === 'empty' ||
+  e === 'no_posts_available';

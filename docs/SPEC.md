@@ -32,8 +32,9 @@ shown with how many posts were actually analyzed and how confident that sample m
 - One self-declared X handle per submission. **Ownership is not verified**, and every surface
   showing a handle says so.
 - Email registration with required consent, plus a **separate, unchecked** board opt-in.
-- Up to the **latest 20 eligible public posts**: original posts, thread roots, and quote posts.
-  No replies, no reposts.
+- Up to the **latest 20 eligible public posts**. The intent is original posts, thread roots
+  and quote posts, with replies and reposts excluded — but the provider exposes no such
+  indicator, so this is approximated and disclosed rather than guaranteed.
 - An experimental **0–1000** score from four public components.
 - **Four headline cards**, a Power Topics section, a short narrative, three contribution
   opportunities, and a downloadable share image.
@@ -90,6 +91,9 @@ Rate limits and the 24-hour cache bound it. Accepted.
 | 1–4 | `Directional result` |
 | 0 | **No score at all** — explain, offer retry |
 
+A separate state exists for accounts the provider cannot read at all: no score, and copy that
+makes clear the limitation is ours, not theirs.
+
 Always display the real analyzed count. Zero eligible posts must never render as a score of 0.
 
 ### Score
@@ -133,46 +137,49 @@ no hidden ranking boost.
 
 ## Latency
 
-The provider answers synchronously in well under a second, so the whole analysis is bounded by
-the model call rather than by data collection.
+Collection is asynchronous and slow. Measured against our own account: **85–127 seconds** to
+trigger, poll, and download one profile.
 
-| Step | p50 | p95 |
+| Lane | When | Total |
 |---|---|---|
-| Provider fetch | 0.8 s | 2.5 s |
-| Eligibility filter, normalization | ~0 | ~0 |
-| Classification + narrative (one call, cached prefix) | 5 s | 12 s |
-| Score, catalog match | ~0 | ~0 |
-| Persist | 0.2 s | 0.5 s |
-| **Total** | **~7 s** | **~15 s** |
+| **Warm** | handle already in the 24h cache | ~1–2 s |
+| **Cold** | anything else | ~90–140 s |
 
-Hard failure at **25 seconds**, with a retry offered.
+Hard failure at **180 seconds**, with a retry offered.
 
-A handle already in the 24-hour cache returns in **~1 second**, which is why pre-warming the
-event's known handles the night before is still worth doing — not because the live path is
-slow, but because instant is better than fast.
+There is no fast lane. Everything that makes this bearable is pre-computation:
+
+1. **Pre-warm the event's known handles the night before.** One trigger takes thousands of
+   URLs, which is the provider's genuine strength. This is not an optimisation; without it
+   most participants wait over two minutes.
+2. **Publish the link before the event**, so early scans warm their own entries.
+3. **Start collection at the handle step**, not after the email step, so the 15–20 seconds
+   someone spends typing an email is time already spent.
 
 ### The Analysis Journey
 
-Four stages advancing on **real events**, minimum 900 ms dwell each so it does not strobe.
-Reassurance copy only if the job exceeds 8 seconds; failure at 25.
+Four stages advancing on real events, minimum 900 ms dwell, then honest escalation:
 
-**No countdown timer, and no playful filler.** A progress bar implying a duration the system
-cannot honour is the one failure people do not forgive. This matters even at seven seconds:
-the temptation is to pad the wait to make the result feel earned, and padding is lying.
+- **10 s** — `Collecting your public posts. This usually takes a minute or two.`
+- **60 s** — `Still collecting — you can leave this page open, we'll finish.`
+- **180 s** — fail, with a retry button.
 
-### A note on provider choice
+**No countdown timer and no playful filler.** A progress bar implying a duration the system
+cannot honour is the one failure people do not forgive, and here we genuinely cannot predict
+it. Say what is happening and let it take the time it takes.
 
-An earlier draft named a different primary provider, chosen because the team already had an
-account and knew its behaviour. Measurement showed it returns profile metadata but **no post
-content at all** — a null posts array against a profile reporting 97 posts, on two separate
-accounts, after 85–127 seconds. Its companion posts dataset requires individual post URLs and
-cannot enumerate a timeline.
+### Two limits the result must disclose
 
-The lesson generalises past this project: *"we already use it and it works"* was true of the
-transport and false of the payload, and nobody noticed because a neighbouring integration
-against a different network succeeded. **Measure the specific thing you need, against your own
-account, before building on it.** That is why the provider sits behind a swappable interface
-and a runtime flag.
+**Not every account can be read.** The provider returns a profile with a null posts array for
+small accounts — measured on an account with 97 posts and 186 followers, three times running,
+while large accounts returned 98 and 100 posts. At a developer event this is a common outcome,
+not an edge case. It gets its own result state (`no_posts_available`) and copy that blames the
+tooling rather than the person: their account is fine, we could not read it.
+
+**Eligibility is approximate.** The provider carries no reply, repost, or quote indicator. A
+leading `@mention` catches most replies; nothing identifies a repost or a quote. So the stated
+rule — original posts, thread roots and quotes only — is not enforceable, and the result must
+say that plainly instead of implying a precision we do not have.
 
 ---
 
@@ -244,7 +251,7 @@ this project, which is why they are written down.
 | Handle → email → *then* analyze | Consent + handle first, email during the fetch | Forfeits 15–20 seconds of free fetch time per participant. |
 | Realtime websockets for the board | 5-second polling | Venue Wi-Fi drops websockets; a reconnect bug on a projector is unrecoverable. |
 | A job queue, Redis, an ORM, an analytics vendor | Postgres and the framework | Each is a plausible-looking day of work that buys nothing at this scale. |
-| A scraping-dataset provider as the post source | A synchronous API that returns tweets | Measured: it returns profile metadata with a null posts array, takes 85-127 s, and its posts dataset cannot enumerate a timeline. |
+| A second post provider alongside the first | One provider, disclosed limits | Two providers means two eligibility semantics and two result qualities in the same room. One honest limitation beats two inconsistent ones. |
 
 ---
 

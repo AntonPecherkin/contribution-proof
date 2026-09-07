@@ -65,10 +65,10 @@ C0 in    └── Codex:  C5 settings/ratelimit  ┐ need only C0,
 
 Wave 0   └── Codex:  C1 scoring       ┐
   in                 C2 normalize     ├ need Claude's tests + fixtures
-                     C4 twitterapi    ┘ (critical path - the only provider)
+                     C3 brightdata    ┘ (critical path - the only provider)
 ```
 
-C1, C2, C4, C5 and C6 all branch from the same commit and touch disjoint files, so they merge in any order.
+C1, C2, C3, C5 and C6 all branch from the same commit and touch disjoint files, so they merge in any order.
 
 ## The one rule that keeps six parallel PRs mergeable
 
