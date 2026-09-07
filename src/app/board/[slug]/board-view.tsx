@@ -82,11 +82,23 @@ export default function BoardView({ slug }: { slug: string }) {
       <div className="board-columns">
         <section>
           <h2>Just in</h2>
-          <ul>{data?.justIn.map((r) => <Row key={r.handle} row={r} />)}</ul>
+          {/*
+            An empty column reads as a broken screen, and the board is emptiest in the first
+            ten minutes when the most people are looking at it. Say something instead.
+          */}
+          {data && data.justIn.length === 0 ? (
+            <p className="board-empty">Scan the code to be the first</p>
+          ) : (
+            <ul>{data?.justIn.map((r) => <Row key={r.handle} row={r} />)}</ul>
+          )}
         </section>
         <section>
           <h2>Top today</h2>
-          <ul>{data?.topToday.map((r, i) => <Row key={r.handle} row={r} rank={i + 1} />)}</ul>
+          {data && data.topToday.length === 0 ? (
+            <p className="board-empty">Filling up shortly</p>
+          ) : (
+            <ul>{data?.topToday.map((r, i) => <Row key={r.handle} row={r} rank={i + 1} />)}</ul>
+          )}
         </section>
       </div>
 

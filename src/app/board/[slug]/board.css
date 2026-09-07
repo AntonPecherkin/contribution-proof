@@ -118,6 +118,12 @@
   text-transform: uppercase;
 }
 
+.board-empty {
+  margin: 2vh 0 0;
+  font-size: 1.7vw;
+  color: var(--muted);
+}
+
 .board-foot { border-top: 1px solid var(--line); padding-top: 1.6vh; flex-shrink: 0; }
 .board-topics { margin: 0 0 0.6vh; font-size: 1.5vw; color: var(--purple); }
 .board-note { margin: 0; font-size: 1.1vw; color: var(--muted); }
