@@ -6,7 +6,14 @@ import { getSettings } from './settings';
 
 export type LimitResult =
   | { allowed: true }
-  | { allowed: false; reason: 'ip' | 'handle' | 'event' };
+  /**
+   * `unavailable` is not a cap breach — it means the limiter could not reach the database.
+   * We still fail closed, because the request would fail downstream anyway and the provider
+   * budget is worth protecting. But it must be distinguishable from a real breach: telling
+   * someone the event is full when the database is down is a false statement, and the copy
+   * rules in docs/SPEC.md do not allow it.
+   */
+  | { allowed: false; reason: 'ip' | 'handle' | 'event' | 'unavailable' };
 
 function hourKey(now: Date): string {
   return now.toISOString().slice(0, 13);
@@ -20,7 +27,7 @@ function denied(reason: unknown): LimitResult {
   if (reason === 'ip' || reason === 'handle' || reason === 'event') {
     return { allowed: false, reason };
   }
-  return { allowed: false, reason: 'event' };
+  return { allowed: false, reason: 'unavailable' };
 }
 
 export async function checkAndIncrement(opts: {

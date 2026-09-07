@@ -128,7 +128,7 @@ describe('checkAndIncrement', () => {
     );
   });
 
-  it('fails closed when the atomic database operation fails', async () => {
+  it('fails closed when the database is unreachable, without claiming a cap was hit', async () => {
     dependencies.rpc.mockResolvedValue({
       data: null,
       error: { message: 'database unavailable' },
@@ -136,6 +136,6 @@ describe('checkAndIncrement', () => {
 
     await expect(checkAndIncrement({
       ip: '203.0.113.8', handle: 'alice', eventId: 'event-1',
-    })).resolves.toEqual({ allowed: false, reason: 'event' });
+    })).resolves.toEqual({ allowed: false, reason: 'unavailable' });
   });
 });
