@@ -103,8 +103,15 @@ Always display the real analyzed count. Zero eligible posts must never render as
 
 ### Score
 
-Experimental, 0–1000. Four components worth 250 each, summed and rounded to the nearest 10.
-Every component is capped independently, so none can run away with the total.
+Experimental. Four components worth 250 each are summed to a raw 0–1000, then mapped onto
+**100–1000** and rounded to the nearest 10. Every component is capped independently, so none
+can run away with the total.
+
+**One scale, two non-overlapping ranges.** A Profile Score tops out at 100; a Contribution
+Score starts there. Every card reads the same way and shows a bare number, yet a bio can
+never appear to beat twenty analysed posts, and nobody has to be told their number belongs
+to a different system. A full analysis with zero technology posts scores 100 — last among
+analyses, still ahead of an account we could not read at all.
 
 **One gate applies first: with zero technology posts, all four components return 0** —
 including reach. Without it, a popular non-technology account would collect points for
@@ -194,21 +201,21 @@ Roughly a third of accounts return a null posts array, concentrated in accounts 
 posted less often. At a developer event that is most of the room, so this is a first-class
 result, not an error page.
 
-It carries a **Profile Score of its own**, rendered bare like every score here — nothing on
-screen ever reads `/100` or `/1000`.
+It carries a **Profile Score of up to 100**, on the same visible scale the Contribution Score
+starts from. Rendered bare, like every score here.
 
-The two are different measurements, kept apart by **name and placement** rather than by
-anything on the card: this is a *Profile* Score, computed from a bio and profile facts, and
-it never ranks on the room board against scores derived from twenty analysed posts.
+The bands are deliberately warm at the bottom: an earlier set handed a real account a 19,
+which is a rough thing to give someone at their own event. Showing up with an account clears
+the first band of every component; the top bands still take real scale to reach.
 
 Four components of 25, weighted toward size and activity:
 
 | Component | Bands |
 |---|---|
-| **Audience** | followers: 100 · 500 · 2k · 10k · 50k |
-| **Output** | total posts: 100 · 500 · 2k · 10k · 40k |
-| **Activity** | posts per year: 12 · 50 · 150 · 400 · 1k |
-| **Topics** | technical areas in the bio, full marks at 3 |
+| **Audience** | followers: 0 · 50 · 250 · 1k · 5k · 20k |
+| **Output** | total posts: 0 · 50 · 300 · 1.5k · 8k |
+| **Activity** | posts per year: 0 · 6 · 30 · 100 · 350 |
+| **Topics** | technical areas in the bio: 1 · 2 · 3 |
 
 Stepped bands rather than a log curve, because a log scale is far too generous at the bottom:
 186 followers against a 10,000 ceiling still returns 0.57, so a small account collected most

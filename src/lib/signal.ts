@@ -10,12 +10,11 @@ import type { ProfileSummary } from './providers/types';
  * feel handed a consolation prize, so this is built to be *liked*: every signal below is a
  * true statement framed as something worth being.
  *
- * It carries a **Profile Score of its own**, rendered bare — no denominator, exactly as the
- * Contribution Score is. Nothing on screen ever reads "/100" or "/1000".
+ * It carries a **Profile Score of up to 100**, on the same visible scale as the Contribution
+ * Score, which starts at 100. One scale, two non-overlapping ranges: every card reads the
+ * same way, and a bio can never appear to beat twenty analysed posts.
  *
- * The two are different measurements and are kept apart by name and by placement: this is a
- * *Profile* Score, computed from a bio and profile facts, and it never ranks on the room
- * board against scores derived from twenty posts.
+ * Both render bare — nothing on screen ever shows a denominator.
  *
  * The other rule: no signal is ever a deficit. We never render "only 186 followers" or
  * "just 97 posts". If a fact cannot be said warmly and truthfully, it is left out. The
@@ -84,15 +83,19 @@ const band = (value: number | null, steps: readonly [number, number][]): number 
   return earned;
 };
 
+// Warmer at the bottom than the first attempt, which handed a real account a 19. Everyone
+// who shows up with an account clears the first band; the top bands still take real scale to
+// reach, so the component keeps discriminating.
 const FOLLOWER_BANDS: readonly [number, number][] = [
-  [100, 5], [500, 10], [2_000, 15], [10_000, 20], [50_000, 25],
+  [0, 4], [50, 8], [250, 13], [1_000, 18], [5_000, 22], [20_000, 25],
 ];
 const OUTPUT_BANDS: readonly [number, number][] = [
-  [100, 4], [500, 9], [2_000, 15], [10_000, 21], [40_000, 25],
+  [0, 4], [50, 9], [300, 14], [1_500, 19], [8_000, 25],
 ];
 const ACTIVITY_BANDS: readonly [number, number][] = [
-  [12, 4], [50, 9], [150, 15], [400, 21], [1_000, 25],
+  [0, 4], [6, 9], [30, 14], [100, 19], [350, 25],
 ];
+const TOPIC_BANDS: readonly [number, number][] = [[1, 10], [2, 18], [3, 25]];
 
 function headlineFor(joinedYear: number | null, topics: string[]): string {
   if (joinedYear !== null) return `Class of ${joinedYear}`;
@@ -165,7 +168,7 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
     audience: band(profile.followers, FOLLOWER_BANDS),
     output: band(profile.postsCount, OUTPUT_BANDS),
     activity: band(postsPerYear, ACTIVITY_BANDS),
-    topics: Math.round(PROFILE_CAP * clampUnit(topics.length / TOPIC_TARGET)),
+    topics: band(topics.length, TOPIC_BANDS),
   };
 
   return {

@@ -39,6 +39,16 @@ export const CONVERSATIONS_CEILING = 2_000;
 /** Weeks of unbroken activity that earn full marks. */
 export const STREAK_TARGET = 4;
 
+/**
+ * A full analysis never scores below this, and a profile-only result never reaches it.
+ *
+ * The two live on one visible scale so every card reads the same way, but the ranges do not
+ * overlap: a Profile Score tops out at 100 and a Contribution Score starts there. Nobody can
+ * appear to beat twenty analysed posts with a bio, and nobody has to be told their number
+ * belongs to a different system.
+ */
+export const CONTRIBUTION_FLOOR = 100;
+
 function clampUnit(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
@@ -77,10 +87,11 @@ export function computeScore(input: ScoreInput): { components: Components; total
       );
 
   const components = { relevance, explanation, consistency, response };
-  // Sum the rounded components so the visible parts add up to the visible whole.
-  const total = Math.round(
-    (relevance + explanation + consistency + response) / 10,
-  ) * 10;
+  // The four components span 0-1000; the displayed total spans 100-1000, so that a full
+  // analysis always outranks a profile-only result on the same scale.
+  const raw = relevance + explanation + consistency + response;
+  const total =
+    CONTRIBUTION_FLOOR + Math.round((raw * (1000 - CONTRIBUTION_FLOOR)) / 1000 / 10) * 10;
 
   return { components, total };
 }

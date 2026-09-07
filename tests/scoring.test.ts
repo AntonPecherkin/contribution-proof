@@ -16,8 +16,13 @@ const base = {
 };
 
 describe('computeScore', () => {
-  it('returns 0 when there is no relevant evidence', () => {
-    expect(computeScore(base).total).toBe(0);
+  it('floors a full analysis at 100, so it can never fall into profile-score territory', () => {
+    // Zero technology posts still means a real analysis happened. It ranks last among
+    // analyses, not below an account we could not read at all.
+    expect(computeScore(base).total).toBe(100);
+    expect(computeScore(base).components).toEqual({
+      relevance: 0, explanation: 0, consistency: 0, response: 0,
+    });
   });
 
   it('caps every component at 250', () => {
@@ -79,7 +84,7 @@ describe('computeScore', () => {
       ...base, relevantCount: 0, explanationRatings: [], longestStreakWeeks: 0, viewsTotal: 250_000, conversationsTotal: 900,
     });
     expect(r.components.response).toBe(0);
-    expect(r.total).toBe(0);
+    expect(r.total).toBe(100);
   });
 
   it('returns whole-number components, because they are stored and displayed as integers', () => {

@@ -56,10 +56,20 @@ describe('profileSignal', () => {
     expect(r.followerRatio).toBeNull();
   });
 
-  it('produces a score of its own, never a denominator', () => {
-    const r = profileSignal(profile({ bio: 'rust, zk proofs, smart contracts' }), NOW);
-    expect(r.profileScore).toBeGreaterThan(0);
-    expect(r.profileScore).toBeLessThanOrEqual(100);
+  it('never reaches 100, where the Contribution Score begins', () => {
+    // One visible scale, two non-overlapping ranges: a bio cannot appear to beat twenty
+    // analysed posts.
+    const best = profileSignal(
+      profile({ followers: 5_000_000, postsCount: 200_000, joinedAt: '2010-01-01T00:00:00.000Z', bio: 'rust zk solana ai security' }),
+      NOW,
+    );
+    expect(best.profileScore).toBeLessThanOrEqual(100);
+  });
+
+  it('welcomes a small account rather than rebuking it', () => {
+    // A real account scored 19 under the first band set. Showing up should clear the floor.
+    const small = profileSignal(profile({ followers: 186, postsCount: 97, bio: 'building web3 and ai' }), NOW);
+    expect(small.profileScore).toBeGreaterThan(30);
   });
 
   it('sums its visible components exactly', () => {
