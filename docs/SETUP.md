@@ -71,13 +71,16 @@ SUPABASE_URL=
 SUPABASE_SECRET_KEY=
 BRIGHTDATA_API_KEY=
 BRIGHTDATA_X_PROFILE_DATASET=gd_lwxmeb2u1cniijd7t4
+
+# The box already runs a dozen services; 3020 was taken.
+HOST_PORT=3040
 ```
 
 Then:
 
 ```bash
 docker compose up -d --build
-curl -s localhost:3020/api/events/hackathon-2026/board   # should be JSON
+curl -s localhost:3040/api/events/hackathon-2026/board   # should be JSON
 ```
 
 Add `nginx.conf` to the site config, point a subdomain at it, and issue a certificate:

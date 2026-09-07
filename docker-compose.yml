@@ -4,8 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      # Host-local only; nginx terminates TLS and proxies to it.
-      - "127.0.0.1:3020:3020"
+      # Host-local only; nginx terminates TLS and proxies to it. The host port is a
+      # variable because this box already runs a dozen services and 3020 was taken.
+      - "127.0.0.1:${HOST_PORT:-3040}:3020"
     environment:
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
