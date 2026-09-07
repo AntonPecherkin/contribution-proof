@@ -16,7 +16,7 @@ const base = {
   conversationsTotal: 0 as number | null,
 };
 
-describe.skip('computeScore', () => {
+describe('computeScore', () => {
   it('returns 0 when there is no relevant evidence', () => {
     expect(computeScore(base).total).toBe(0);
   });
