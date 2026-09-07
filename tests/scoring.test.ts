@@ -16,7 +16,7 @@ const base = {
   conversationsTotal: 0 as number | null,
 };
 
-describe.skip('computeScore', () => {
+describe('computeScore', () => {
   it('returns 0 when there is no relevant evidence', () => {
     expect(computeScore(base).total).toBe(0);
   });
@@ -73,6 +73,29 @@ describe.skip('computeScore', () => {
       conversationsTotal: 311,
     });
     expect(r.total % 10).toBe(0);
+  });
+
+  it('scores zero for a popular account with no technology posts', () => {
+    // The response component measures the response to the contribution. With no relevant
+    // posts there is no contribution, and reach alone must not produce a score.
+    const r = computeScore({
+      ...base, relevantCount: 0, explanationRatings: [], activeWeeks: 0,
+      relevantCountsByWeek: [], viewsTotal: 250_000, conversationsTotal: 900,
+    });
+    expect(r.components.response).toBe(0);
+    expect(r.total).toBe(0);
+  });
+
+  it('returns whole-number components, because they are stored and displayed as integers', () => {
+    const r = computeScore({
+      eligibleCount: 17, relevantCount: 11,
+      explanationRatings: [0.8, 0.6, 0.9, 0.4, 0.7, 0.5, 0.9, 0.3, 0.6, 0.8, 0.7],
+      activeWeeks: 3, relevantCountsByWeek: [5, 4, 2],
+      viewsTotal: 48_213, conversationsTotal: 311,
+    });
+    for (const [name, value] of Object.entries(r.components)) {
+      expect(Number.isInteger(value), `${name} = ${value}`).toBe(true);
+    }
   });
 
   it('treats a null views value as absent, not as zero', () => {
