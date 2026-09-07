@@ -45,11 +45,7 @@ export type ProviderErrorClass =
   | 'provider'
   | 'timeout';
 
-/**
- * A fetch outcome. Note the third arm: some providers collect asynchronously and hand
- * back a claim ticket instead of data. That is neither success nor failure, and modelling
- * it as either is what forces job queues into designs that do not need them.
- */
+/** A fetch outcome. Success, or a classified failure. Nothing else. */
 export type ProfileResult =
   | {
       ok: true;
@@ -58,26 +54,19 @@ export type ProfileResult =
       followers: number | null;
       posts: Post[];
     }
-  | { ok: false; errorClass: ProviderErrorClass }
-  | { ok: false; pending: true; snapshotId: string };
+  | { ok: false; errorClass: ProviderErrorClass };
 
 export interface PostProvider {
-  readonly name: 'brightdata' | 'twitterapi' | 'mock';
+  readonly name: 'twitterapi' | 'mock';
   /** Never throws. Every failure is a returned ProfileResult. */
   fetchRecentPosts(handle: string, limit: number): Promise<ProfileResult>;
-  /** Only implemented by providers that collect asynchronously. */
-  resolveSnapshot?(snapshotId: string): Promise<ProfileResult>;
 }
 
 /** Narrowing helpers, so call sites read as intent rather than shape-poking. */
 export const isOk = (r: ProfileResult): r is Extract<ProfileResult, { ok: true }> => r.ok;
-export const isPending = (
-  r: ProfileResult,
-): r is Extract<ProfileResult, { pending: true }> => !r.ok && 'pending' in r;
 export const isFailure = (
   r: ProfileResult,
-): r is Extract<ProfileResult, { errorClass: ProviderErrorClass }> =>
-  !r.ok && 'errorClass' in r;
+): r is Extract<ProfileResult, { errorClass: ProviderErrorClass }> => !r.ok;
 
 /** These three mean "nothing to analyze", not "something went wrong". Do not retry them. */
 export const isAnswerNotFailure = (e: ProviderErrorClass): boolean =>

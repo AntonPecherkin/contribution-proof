@@ -131,41 +131,48 @@ no hidden ranking boost.
 
 ---
 
-## Latency, and the four things that pay for it
+## Latency
 
-The primary provider collects slowly. Its synchronous endpoint waits up to 60 seconds and then
-degrades to an asynchronous snapshot that must be polled. That produces three lanes:
+The provider answers synchronously in well under a second, so the whole analysis is bounded by
+the model call rather than by data collection.
 
-| Lane | When | Total |
+| Step | p50 | p95 |
 |---|---|---|
-| **Warm** | handle already in the 24h cache | ~1–2 s |
-| **Sync** | fresh handle, provider answers in time | ~15–40 s |
-| **Snapshot** | provider degrades to async | ~50–120 s |
+| Provider fetch | 0.8 s | 2.5 s |
+| Eligibility filter, normalization | ~0 | ~0 |
+| Classification + narrative (one call, cached prefix) | 5 s | 12 s |
+| Score, catalog match | ~0 | ~0 |
+| Persist | 0.2 s | 0.5 s |
+| **Total** | **~7 s** | **~15 s** |
 
-Hard failure at **120 seconds**, with a retry offered.
+Hard failure at **25 seconds**, with a retry offered.
 
-Four mechanisms buy the time back, and none is optional:
-
-1. The fetch starts at the handle step (see the flow above).
-2. The event's known handles are **bulk pre-warmed into the cache the night before**. The
-   provider takes thousands of URLs per batch request, so bulk is what it is genuinely good
-   at. Most participants should land in the warm lane.
-3. The link is published before the event, so early scans warm their own entries.
-4. A second provider is implemented behind the same interface and selectable at runtime, so a
-   swap needs no redeploy.
+A handle already in the 24-hour cache returns in **~1 second**, which is why pre-warming the
+event's known handles the night before is still worth doing — not because the live path is
+slow, but because instant is better than fast.
 
 ### The Analysis Journey
 
-Four stages advancing on **real events**, minimum 900 ms dwell each so it does not strobe, then
-honest escalation:
+Four stages advancing on **real events**, minimum 900 ms dwell each so it does not strobe.
+Reassurance copy only if the job exceeds 8 seconds; failure at 25.
 
-- **10 s** — `Fetching the full public post history, this can take up to a minute`
-- **45 s** — `Still collecting — you can leave this page open, we'll finish`
-- **120 s** — fail, with a retry button
+**No countdown timer, and no playful filler.** A progress bar implying a duration the system
+cannot honour is the one failure people do not forgive. This matters even at seven seconds:
+the temptation is to pad the wait to make the result feel earned, and padding is lying.
 
-**No countdown timer, and no playful filler messages.** A progress bar that implies a duration
-the system cannot honour is the one failure people do not forgive. Slow and honest beats fast
-and fictional.
+### A note on provider choice
+
+An earlier draft named a different primary provider, chosen because the team already had an
+account and knew its behaviour. Measurement showed it returns profile metadata but **no post
+content at all** — a null posts array against a profile reporting 97 posts, on two separate
+accounts, after 85–127 seconds. Its companion posts dataset requires individual post URLs and
+cannot enumerate a timeline.
+
+The lesson generalises past this project: *"we already use it and it works"* was true of the
+transport and false of the payload, and nobody noticed because a neighbouring integration
+against a different network succeeded. **Measure the specific thing you need, against your own
+account, before building on it.** That is why the provider sits behind a swappable interface
+and a runtime flag.
 
 ---
 
@@ -183,8 +190,7 @@ and fictional.
 There is **no queue service and no signed job token.** A row in `analyses` is the unit of work:
 
 - `POST` inserts the row and returns its id; work continues after the response.
-- `GET` on that id polls it, resolves a provider snapshot if one is pending, and re-triggers
-  work if the row has been live past a threshold.
+- `GET` on that id polls it, and re-triggers work if the row has been live past a threshold.
 - A **partial unique index** on `(event_id, x_handle_normalized)` over live statuses supplies
   idempotency and single-flight for free: a duplicate submission returns the existing row
   rather than paying a second provider bill.
@@ -238,6 +244,7 @@ this project, which is why they are written down.
 | Handle → email → *then* analyze | Consent + handle first, email during the fetch | Forfeits 15–20 seconds of free fetch time per participant. |
 | Realtime websockets for the board | 5-second polling | Venue Wi-Fi drops websockets; a reconnect bug on a projector is unrecoverable. |
 | A job queue, Redis, an ORM, an analytics vendor | Postgres and the framework | Each is a plausible-looking day of work that buys nothing at this scale. |
+| A scraping-dataset provider as the post source | A synchronous API that returns tweets | Measured: it returns profile metadata with a null posts array, takes 85-127 s, and its posts dataset cannot enumerate a timeline. |
 
 ---
 

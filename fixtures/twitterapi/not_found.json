@@ -1,0 +1,7 @@
+{
+  "tweets": [],
+  "has_next_page": false,
+  "next_cursor": "",
+  "status": "error",
+  "message": "user not found"
+}

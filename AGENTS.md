@@ -55,13 +55,11 @@ export type Post = {
 
 export type ProfileResult =
   | { ok: true; handle: string; displayName: string; followers: number | null; posts: Post[] }
-  | { ok: false; errorClass: 'invalid_handle' | 'private' | 'empty' | 'provider' | 'timeout' }
-  | { ok: false; pending: true; snapshotId: string };
+  | { ok: false; errorClass: 'invalid_handle' | 'private' | 'empty' | 'provider' | 'timeout' };
 
 export interface PostProvider {
-  name: 'brightdata' | 'twitterapi' | 'mock';
+  name: 'twitterapi' | 'mock';
   fetchRecentPosts(handle: string, limit: number): Promise<ProfileResult>;
-  resolveSnapshot?(snapshotId: string): Promise<ProfileResult>;
 }
 
 // src/lib/scoring.ts
@@ -95,7 +93,7 @@ description instead.
 | Repo scaffold, CI, migrations | Codex |
 | Contracts, fixtures, and the failing tests | Claude |
 | `src/lib/scoring.ts`, `normalize.ts`, `evidence.ts` | Codex — one task each |
-| `src/lib/providers/{brightdata,twitterapi}.ts` | Codex — one task each |
+| `src/lib/providers/twitterapi.ts`, `index.ts` | Codex |
 | `src/lib/{settings,ratelimit,analytics,catalog}.ts` | Codex — one task each |
 | `scripts/prewarm.mjs`, `src/app/api/share/[id]/` | Codex |
 | `tests/**` — Playwright smoke | Codex |

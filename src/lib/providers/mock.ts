@@ -1,63 +1,67 @@
 import type { PostProvider, ProfileResult, Post } from './types';
 
-import rich from '../../../fixtures/brightdata/rich.json';
-import thin from '../../../fixtures/brightdata/thin.json';
+import rich from '../../../fixtures/twitterapi/rich.json';
+import thin from '../../../fixtures/twitterapi/thin.json';
 
 /**
  * Fixture-backed provider. Selected by `MOCK=1`, or by setting `primary_provider` to
- * `'mock'` at runtime — which is also the event-day escape hatch if every real provider
- * fails at once.
+ * `'mock'` at runtime — which is also the event-day escape hatch if the real provider fails.
  *
- * Handles are routed by name so that every path is reachable without a network:
+ * Handles route by name so every path is reachable with no network:
  *
- *   devbuilder     20 posts, 15 eligible          -> good evidence
- *   thinbuilder    3 posts                        -> directional result
- *   emptybuilder   0 posts                        -> no score
- *   lockedaccount  protected                      -> private
- *   slowbuilder    async collection               -> pending, then resolves
- *   brokenapi      provider failure               -> provider
- *   anything else                                 -> invalid_handle
+ *   devbuilder     20 tweets, 15 eligible   -> good evidence
+ *   thinbuilder    3 tweets                 -> directional result
+ *   emptybuilder   0 tweets                 -> empty
+ *   lockedaccount  protected                -> private
+ *   brokenapi      upstream failure         -> provider
+ *   anything else                           -> invalid_handle
  */
 
-type RawPost = {
+type RawTweet = {
   id: string;
-  description: string;
-  date_posted: string;
-  likes: number;
-  reposts: number;
-  replies: number;
-  views?: number;
-  quoted_post: { id: string } | null;
-  parent_post_details: { id: string } | null;
-  is_repost: boolean;
+  text: string;
+  createdAt: string;
+  viewCount?: number;
+  replyCount?: number;
+  retweetCount?: number;
+  likeCount?: number;
+  isReply: boolean;
+  quoted_tweet: unknown | null;
+  retweeted_tweet: unknown | null;
 };
 
+type RawEnvelope = { tweets: RawTweet[] };
+
 /**
- * Deliberately mirrors what a real adapter must do, so that a bug in this mapping shows up
- * in development rather than only in production. Note `views`: absent means `null`, and it
- * must not become 0.
+ * Mirrors what the real adapter must do, so a mapping bug surfaces in development rather
+ * than only in production.
+ *
+ * Two things to preserve exactly: `createdAt` arrives in Twitter's own format
+ * ("Tue Dec 10 07:00:30 +0000 2024") and must become ISO 8601; and an absent `viewCount`
+ * becomes `null`, never 0 — the API does not always report impressions, and "not reported"
+ * is not "nobody saw it".
  */
-function toPost(raw: RawPost): Post {
+function toPost(raw: RawTweet): Post {
   return {
     id: raw.id,
-    text: raw.description,
-    createdAt: new Date(raw.date_posted).toISOString(),
-    views: raw.views ?? null,
-    replies: raw.replies ?? null,
-    reposts: raw.reposts ?? null,
-    likes: raw.likes ?? null,
-    isReply: raw.parent_post_details !== null,
-    isRepost: raw.is_repost === true,
-    isQuote: raw.quoted_post !== null,
+    text: raw.text,
+    createdAt: new Date(raw.createdAt).toISOString(),
+    views: raw.viewCount ?? null,
+    replies: raw.replyCount ?? null,
+    reposts: raw.retweetCount ?? null,
+    likes: raw.likeCount ?? null,
+    isReply: raw.isReply === true,
+    isRepost: raw.retweeted_tweet !== null,
+    isQuote: raw.quoted_tweet !== null,
   };
 }
 
-const profile = (posts: RawPost[], limit: number): ProfileResult => ({
+const profile = (env: RawEnvelope, limit: number): ProfileResult => ({
   ok: true,
   handle: 'devbuilder',
   displayName: 'Dev Builder',
   followers: 4821,
-  posts: posts.slice(0, limit).map(toPost),
+  posts: env.tweets.slice(0, limit).map(toPost),
 });
 
 export const mockProvider: PostProvider = {
@@ -66,24 +70,17 @@ export const mockProvider: PostProvider = {
   async fetchRecentPosts(handle: string, limit: number): Promise<ProfileResult> {
     switch (handle.toLowerCase()) {
       case 'devbuilder':
-        return profile(rich as RawPost[], limit);
+        return profile(rich as RawEnvelope, limit);
       case 'thinbuilder':
-        return profile(thin as RawPost[], limit);
+        return profile(thin as RawEnvelope, limit);
       case 'emptybuilder':
         return { ok: false, errorClass: 'empty' };
       case 'lockedaccount':
         return { ok: false, errorClass: 'private' };
-      case 'slowbuilder':
-        return { ok: false, pending: true, snapshotId: 's_m2k9x4qp0000abcd' };
       case 'brokenapi':
         return { ok: false, errorClass: 'provider' };
       default:
         return { ok: false, errorClass: 'invalid_handle' };
     }
-  },
-
-  async resolveSnapshot(snapshotId: string): Promise<ProfileResult> {
-    if (snapshotId === 's_m2k9x4qp0000abcd') return profile(rich as RawPost[], 20);
-    return { ok: false, errorClass: 'provider' };
   },
 };

@@ -1,26 +1,24 @@
 # Fixtures
 
-Recorded provider responses. They let every task be built and tested with no network and
-no credentials (`MOCK=1`).
+Recorded provider responses. They let every task be built and tested with no network and no
+credentials (`MOCK=1`).
 
-## PROVISIONAL — read before implementing C3
+## Provisional — shaped from documentation, not yet recorded
 
-The files in `brightdata/` are **shaped from public sample data, not recorded from our
-account.** The field names are plausible but unverified.
+`twitterapi/` matches the documented response schema for **Get User Last Tweets**: the
+envelope (`tweets`, `has_next_page`, `next_cursor`, `status`, `message`) and the tweet fields
+we consume (`id`, `text`, `createdAt`, `viewCount`, `replyCount`, `retweetCount`, `likeCount`,
+`isReply`, `quoted_tweet`, `retweeted_tweet`, `author`).
 
-**Before dispatching C3, replace them with one real recorded response**, sanitized:
+That is a much stronger position than the previous provider's fixtures, which were guessed and
+turned out to describe a response that does not exist. But it is still documentation rather
+than observation.
 
-1. Call the scraper once for an account you control.
-2. Save the raw JSON.
-3. Remove every field the application does not consume, and any field naming a third party.
-4. Derive the other fixtures from that real shape.
-
-If C3 is implemented against a guessed shape, it will pass its tests and fail against the
-live API — the worst possible outcome, because the tests will say it works.
-
-`twitterapi/` is in the same position and gates C4.
+**Once a key exists, record one real response and reconcile**: call the endpoint for an account
+you control, save the raw JSON, drop every field the code does not read, and diff it against
+`rich.json`. Fix any mismatch before trusting the provider tests.
 
 ## Sanitizing
 
-Fixtures are committed to a repository that becomes public. Keep only fields the code
-reads. Handles and post text in fixtures should be invented, not real people's.
+Fixtures are committed to a repository that becomes public. Keep only fields the code reads.
+Handles and post text must be invented, never a real person's.
