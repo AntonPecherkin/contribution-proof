@@ -1,7 +1,11 @@
 {
-  "tweets": [],
+  "status": "success",
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "pin_tweet": null,
+    "tweets": []
+  },
   "has_next_page": false,
-  "next_cursor": "",
-  "status": "error",
-  "message": "user not found"
+  "next_cursor": ""
 }

@@ -30,7 +30,8 @@ type RawTweet = {
   retweeted_tweet: unknown | null;
 };
 
-type RawEnvelope = { tweets: RawTweet[] };
+// Observed shape: tweets are nested under `data`, not top level.
+type RawEnvelope = { data: { tweets: RawTweet[] } };
 
 /**
  * Mirrors what the real adapter must do, so a mapping bug surfaces in development rather
@@ -61,7 +62,7 @@ const profile = (env: RawEnvelope, limit: number): ProfileResult => ({
   handle: 'devbuilder',
   displayName: 'Dev Builder',
   followers: 4821,
-  posts: env.tweets.slice(0, limit).map(toPost),
+  posts: env.data.tweets.slice(0, limit).map(toPost),
 });
 
 export const mockProvider: PostProvider = {

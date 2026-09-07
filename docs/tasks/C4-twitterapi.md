@@ -31,13 +31,21 @@ export function getProvider(): PostProvider;        // index.ts, per settings.pr
 
 ## Spec
 
-`GET` the **Get User Last Tweets** endpoint with header `x-api-key: $TWITTERAPI_KEY`.
-Query: `userName=<handle>`. Leave `includeReplies` at its default of `false`; still filter
-defensively, because eligibility is our rule and not theirs. One page is 20 tweets, which is
-exactly the window — **do not paginate**, and ignore `has_next_page` / `next_cursor`.
+`GET https://api.twitterapi.io/twitter/user/last_tweets?userName=<handle>` with header
+`x-api-key: $TWITTERAPI_KEY`. Leave `includeReplies` at its default of `false`; still filter
+defensively, because eligibility is our rule and not theirs. One page is up to 20 tweets,
+which is exactly the window — **do not paginate**, and ignore `has_next_page` / `next_cursor`.
 
-**Response envelope:** `{ tweets: [...], has_next_page, next_cursor, status, message }` where
-`status` is `"success"` or `"error"`.
+**Response envelope — observed, not documented.** The published schema shows `tweets` at the
+top level. It is not there. The real shape is:
+
+```json
+{ "status": "success", "code": 0, "msg": "success",
+  "data": { "pin_tweet": null, "tweets": [ ... ] },
+  "has_next_page": false, "next_cursor": "..." }
+```
+
+Tweets are under **`data.tweets`**. Read the fixtures, not the docs.
 
 **Field mapping** — this table is the task:
 
@@ -57,15 +65,27 @@ exactly the window — **do not paginate**, and ignore `has_next_page` / `next_c
 **Never write `?? 0` for a metric.** A missing count and a zero count are different facts and
 the scoring module treats them differently. `?? null` is the only correct default.
 
-**Error mapping** — this is where the participant's experience is decided:
+**Error mapping** — this is where the participant's experience is decided, and the observed
+behaviour is not what the documentation implies.
+
+**A handle that does not exist returns HTTP 200, `status: "success"`, `data.tweets: []`** —
+byte-identical to a real account that has never posted. The endpoint cannot tell them apart,
+and the two need different copy: "check the spelling" versus "you have no eligible posts yet".
+
+So on an empty result, **make a second call** to the user-info endpoint
+(`/twitter/user/info?userName=<handle>`) to disambiguate:
 
 | Signal | `errorClass` |
 |---|---|
-| `status: "error"` with a not-found message, or HTTP 404 | `invalid_handle` |
-| `status: "error"` with a protected/suspended message | `private` |
-| `status: "success"` with `tweets: []` | `empty` |
+| `data.tweets: []` **and** the user lookup says no such user | `invalid_handle` |
+| `data.tweets: []` **and** the user exists | `empty` |
+| The user lookup reports the account protected | `private` |
+| HTTP 403 (`{"error":"Forbidden"}`) | `provider` — our key is missing or invalid, not the participant's problem |
+| HTTP 429 | retry once honouring any delay, then `provider` |
 | HTTP 5xx, network failure, unparseable body | `provider` |
 | Request exceeded the timeout | `timeout` |
+
+The second call happens **only** on the empty path, so it costs nothing in the common case.
 
 `invalid_handle`, `private`, and `empty` are **answers, not failures**. Never retry them and
 never fall through to another provider on them.
@@ -91,8 +111,10 @@ Stub `fetch`; **no live network in tests.** Cover:
 - **a tweet with no `viewCount` → `views === null`, not `0`**
 - `thin.json` → `ok: true`, 3 posts
 - `empty.json` → `errorClass: 'empty'`
-- `private.json` → `errorClass: 'private'`
-- `not_found.json` → `errorClass: 'invalid_handle'`
+- `not_found.json` (identical to `empty.json`) + a user lookup saying no such user → `errorClass: 'invalid_handle'`
+- `empty.json` + a user lookup saying the user exists → `errorClass: 'empty'`
+- `forbidden.json` / HTTP 403 → `errorClass: 'provider'`, and **not** `invalid_handle`
+- `rate_limited.json` / HTTP 429 → retried once, then `errorClass: 'provider'`
 - `malformed.json` → `errorClass: 'provider'`, no throw
 - HTTP 500 → retried once, then `errorClass: 'provider'`
 - `429` with `Retry-After` → waits, retries once

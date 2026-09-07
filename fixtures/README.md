@@ -3,22 +3,23 @@
 Recorded provider responses. They let every task be built and tested with no network and no
 credentials (`MOCK=1`).
 
-## Provisional — shaped from documentation, not yet recorded
+## Recorded from a real response, 2026-09-07
 
-`twitterapi/` matches the documented response schema for **Get User Last Tweets**: the
-envelope (`tweets`, `has_next_page`, `next_cursor`, `status`, `message`) and the tweet fields
-we consume (`id`, `text`, `createdAt`, `viewCount`, `replyCount`, `retweetCount`, `likeCount`,
-`isReply`, `quoted_tweet`, `retweeted_tweet`, `author`).
+`twitterapi/` matches an actual observed response, not the published schema. **The two differ**
+— the documentation shows `tweets` at the top level; in reality they are nested under `data`:
 
-That is a much stronger position than the previous provider's fixtures, which were guessed and
-turned out to describe a response that does not exist. But it is still documentation rather
-than observation.
+```json
+{ "status": "success", "code": 0, "msg": "success",
+  "data": { "pin_tweet": null, "tweets": [ ... ] },
+  "has_next_page": false, "next_cursor": "..." }
+```
 
-**Once a key exists, record one real response and reconcile**: call the endpoint for an account
-you control, save the raw JSON, drop every field the code does not read, and diff it against
-`rich.json`. Fix any mismatch before trusting the provider tests.
+Content is invented; only the structure is real. That is the correct trade for a repository
+that becomes public: we need the shape, not a stranger's posts.
 
-## Sanitizing
+## The one thing these fixtures cannot express
 
-Fixtures are committed to a repository that becomes public. Keep only fields the code reads.
-Handles and post text must be invented, never a real person's.
+`empty.json` and `not_found.json` are **byte-identical on purpose.** A handle that does not
+exist and an account that has never posted produce exactly the same response. Distinguishing
+them needs a second call to the user-info endpoint, which is why `C4` specifies one on the
+empty path. If you find yourself "fixing" the duplicate fixtures, read that section first.

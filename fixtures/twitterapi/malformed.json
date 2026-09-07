@@ -1,1 +1,1 @@
-{"tweets": [{"id": 12345, "createdAt": "not-a-date",
+{"status":"success","data":{"tweets":[{"id":12345,
