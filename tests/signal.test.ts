@@ -56,8 +56,34 @@ describe('profileSignal', () => {
     expect(r.followerRatio).toBeNull();
   });
 
-  it('carries no score, because a bio and twenty posts are not comparable', () => {
-    expect(Object.keys(profileSignal(profile(), NOW))).not.toContain('score');
+  it('scores out of 100, never out of 1000', () => {
+    // The different scale IS the honesty mechanism: 72 beside 820 cannot be mistaken for
+    // the same measurement, where 300 beside 820 invites exactly that confusion.
+    const r = profileSignal(profile({ bio: 'rust, zk proofs, smart contracts' }), NOW);
+    expect(r.profileScore).toBeGreaterThan(0);
+    expect(r.profileScore).toBeLessThanOrEqual(100);
+  });
+
+  it('sums its visible components exactly', () => {
+    const r = profileSignal(profile({ bio: 'solana rust zk' }), NOW);
+    const { topics, tenure, cadence, presence } = r.components;
+    expect(topics + tenure + cadence + presence).toBe(r.profileScore);
+    for (const v of [topics, tenure, cadence, presence]) expect(v).toBeLessThanOrEqual(25);
+  });
+
+  it('still scores when facts are missing, rather than refusing', () => {
+    // Three parts and a number beats four parts and nothing.
+    const r = profileSignal(profile({ joinedAt: null, postsCount: null, bio: null }), NOW);
+    expect(r.components.tenure).toBe(0);
+    expect(r.components.cadence).toBe(0);
+    expect(r.profileScore).toBeGreaterThan(0);
+  });
+
+  it('credits both directions of the follower ratio', () => {
+    // Being followed is reach; following widely is participation. Neither is a shortfall.
+    const followed = profileSignal(profile({ followers: 5000, following: 100 }), NOW);
+    const following = profileSignal(profile({ followers: 100, following: 5000 }), NOW);
+    expect(followed.components.presence).toBe(following.components.presence);
   });
 
   it('names our data source as the limit, never the person', () => {

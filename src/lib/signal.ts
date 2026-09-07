@@ -10,13 +10,33 @@ import type { ProfileSummary } from './providers/types';
  * feel handed a consolation prize, so this is built to be *liked*: every signal below is a
  * true statement framed as something worth being.
  *
- * Two rules hold it honest. It carries **no 0-1000 score**, because a bio and twenty posts
- * are not the same measurement and a shared board would make them look like one. And no
- * signal is ever a deficit — we never render "only 186 followers" or "just 97 posts". If a
- * fact cannot be said warmly and truthfully, it is left out.
+ * It carries a **Profile Score out of 100**, deliberately not out of 1000. The different
+ * scale is the honesty mechanism: a 72 beside an 820 cannot be mistaken for the same
+ * measurement, where a 300 beside an 820 invites exactly that confusion. Different name,
+ * different range, different basis — and it never ranks on the same board.
+ *
+ * The other rule: no signal is ever a deficit. We never render "only 186 followers" or
+ * "just 97 posts". If a fact cannot be said warmly and truthfully, it is left out. The
+ * badges are the hero; the number is secondary.
  */
 
 export type Signal = { id: string; label: string; detail: string };
+
+/** Four parts of 25, mirroring the shape of the Contribution Score without its scale. */
+export type ProfileComponents = {
+  topics: number;
+  tenure: number;
+  cadence: number;
+  presence: number;
+};
+
+export const PROFILE_CAP = 25;
+/** Bio topics that earn full marks. */
+export const TOPIC_TARGET = 3;
+/** Years on X that earn full marks. */
+export const TENURE_TARGET = 5;
+/** Posts per year that earn full marks, log-scaled below it. */
+export const CADENCE_CEILING = 200;
 
 export type ProfileSignal = {
   profile: ProfileSummary;
@@ -26,6 +46,9 @@ export type ProfileSignal = {
   accountAgeYears: number | null;
   postsPerYear: number | null;
   followerRatio: number | null;
+  /** Out of 100. Never out of 1000, and never on the room board. */
+  profileScore: number;
+  components: ProfileComponents;
   /** Short, specific, and never generic — this is what people screenshot. */
   headline: string;
   signals: Signal[];
@@ -38,6 +61,11 @@ const NOTE =
   'which happens with accounts that post less often. Nothing about your account is wrong.';
 
 const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
+
+const clampUnit = (n: number) => Math.min(1, Math.max(0, n));
+/** Saturating, so a prolific account cannot run away with the cadence component. */
+const logScale = (v: number, ceiling: number) =>
+  clampUnit(Math.log1p(Math.max(0, v)) / Math.log1p(ceiling));
 
 function headlineFor(joinedYear: number | null, topics: string[]): string {
   if (joinedYear !== null) return `Class of ${joinedYear}`;
@@ -103,10 +131,33 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
   if (profile.externalLink) add('ships', 'Ships things', 'There is a link in your bio');
   if (profile.location) add('located', 'On the map', profile.location);
 
+  // Each component is 0-25 and rounded, so the visible parts add up to the visible whole.
+  // A missing fact scores 0 for that part rather than blocking the score: we would rather
+  // hand someone 41 with three parts than nothing at all.
+  const components: ProfileComponents = {
+    topics: Math.round(PROFILE_CAP * clampUnit(topics.length / TOPIC_TARGET)),
+    tenure:
+      ageYears === null ? 0 : Math.round(PROFILE_CAP * clampUnit(ageYears / TENURE_TARGET)),
+    cadence:
+      postsPerYear === null ? 0 : Math.round(PROFILE_CAP * logScale(postsPerYear, CADENCE_CEILING)),
+    presence: Math.round(
+      PROFILE_CAP *
+        clampUnit(
+          (profile.isVerified ? 0.5 : 0) +
+            // Both directions of the ratio earn credit: being followed is reach, and
+            // following widely is participation. Neither end is a shortfall here.
+            (followerRatio === null ? 0.25 : 0.5 * logScale(Math.max(followerRatio, 1 / followerRatio), 20)),
+        ),
+    ),
+  };
+
   return {
     profile,
     topics,
     matchedWords: [...new Set(matched)],
+    profileScore:
+      components.topics + components.tenure + components.cadence + components.presence,
+    components,
     accountAgeYears: ageYears === null ? null : Number(ageYears.toFixed(1)),
     postsPerYear,
     followerRatio,

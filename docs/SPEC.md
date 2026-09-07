@@ -194,8 +194,24 @@ Roughly a third of accounts return a null posts array, concentrated in accounts 
 posted less often. At a developer event that is most of the room, so this is a first-class
 result, not an error page.
 
-It carries **no 0–1000 score and never appears on the room board.** A bio and twenty posts
-are not the same measurement, and one board showing both would make them look like one.
+It carries a **Profile Score out of 100** — deliberately not out of 1000, and never on the
+room board. The different scale is the honesty mechanism: a 72 beside an 820 cannot be
+mistaken for the same measurement, where a 300 beside an 820 invites exactly that confusion.
+Different name, different range, different basis.
+
+Four components of 25, mirroring the main score's shape without borrowing its scale:
+
+| Component | Full marks at |
+|---|---|
+| **Topics** | 3 technical areas in the bio |
+| **Tenure** | 5 years on X |
+| **Cadence** | 200 posts a year, log-scaled below it |
+| **Presence** | verified, plus a follower ratio far from 1 in either direction |
+
+A missing fact scores 0 for its part rather than blocking the score — we would rather hand
+someone 41 from three parts than nothing from four. Both directions of the follower ratio
+earn equal credit: being followed is reach, following widely is participation, and neither
+is a shortfall.
 
 A headline — `Class of 2020`, else the top bio topic, else `New around here` — and badges
 drawn from the profile: Verified, Long hauler / Established / Fresh start, Prolific /
@@ -328,7 +344,7 @@ this project, which is why they are written down.
 | A job queue, Redis, an ORM, an analytics vendor | Postgres and the framework | Each is a plausible-looking day of work that buys nothing at this scale. |
 | A second post provider alongside the first | One provider, disclosed limits | Two providers means two eligibility semantics and two result qualities in the same room. One honest limitation beats two inconsistent ones. |
 | A language model judging posts | Keyword topics plus heuristic depth | The model read intent better, but cost a key, a credit balance, ~10 s, and a class of failures outside this repo. Deterministic scoring is reproducible, inspectable and free — and at a booth, being able to show which words matched beats a subtler judgement nobody can check. |
-| A score on the Profile Signal | No score there at all | It would rank against post-derived scores on the same board and mean something different. |
+| A Profile Signal score on the 0-1000 scale | A Profile Score out of 100 | Same scale means same claim. A different range keeps the two measurements visibly distinct while still handing everyone a number. |
 
 ---
 
