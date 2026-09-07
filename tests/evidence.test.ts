@@ -6,7 +6,7 @@ import { evidenceBand } from '../src/lib/evidence';
  * make it pass. Do not change an assertion — if you believe one is wrong, say so in the
  * PR and leave it.
  */
-describe.skip('evidenceBand', () => {
+describe('evidenceBand', () => {
   it('calls 15 or more analyzed posts good evidence', () => {
     expect(evidenceBand(15)).toBe('good');
     expect(evidenceBand(20)).toBe('good');
