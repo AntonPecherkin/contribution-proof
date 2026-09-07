@@ -15,7 +15,13 @@ export type ScoreInput = {
   activeWeeks: number;
   /** One entry per active week, for the spread factor. */
   relevantCountsByWeek: number[];
-  /** null means the provider did not report it. NOT zero. */
+  /**
+   * Totals over RELEVANT posts only — the response to the contribution, not to the
+   * account. Passing account-wide totals would score a popular non-technology account
+   * for reach it did not earn here.
+   *
+   * `null` means the provider did not report it. It is not zero.
+   */
   viewsTotal: number | null;
   conversationsTotal: number | null;
 };
@@ -57,22 +63,35 @@ function reach(value: number | null, ceiling: number): number {
 }
 
 export function computeScore(input: ScoreInput): { components: Components; total: number } {
-  const relevance = CAP * clampUnit(input.relevantCount / Math.max(1, input.eligibleCount));
+  // Components are whole numbers: they are stored in integer columns and shown to people,
+  // so a fractional component would diverge between screen and database.
+  const relevance = Math.round(
+    CAP * clampUnit(input.relevantCount / Math.max(1, input.eligibleCount)),
+  );
   const explanation = input.relevantCount === 0
     ? 0
-    : CAP * clampUnit(mean(input.explanationRatings));
+    : Math.round(CAP * clampUnit(mean(input.explanationRatings)));
   const consistency = input.relevantCount === 0
     ? 0
-    : CAP * (Math.min(Math.max(input.activeWeeks, 0), 4) / 4)
-      * spreadFactor(input.relevantCountsByWeek);
-  const response = CAP * (
-    0.7 * reach(input.viewsTotal, VIEWS_CEILING)
-    + 0.3 * reach(input.conversationsTotal, CONVERSATIONS_CEILING)
-  );
+    : Math.round(
+        CAP * (Math.min(Math.max(input.activeWeeks, 0), 4) / 4)
+          * spreadFactor(input.relevantCountsByWeek),
+      );
+  // No relevant posts means there is no contribution for anyone to have responded to.
+  // Without this guard a popular non-technology account scores on reach alone.
+  const response = input.relevantCount === 0
+    ? 0
+    : Math.round(
+        CAP * (
+          0.7 * reach(input.viewsTotal, VIEWS_CEILING)
+          + 0.3 * reach(input.conversationsTotal, CONVERSATIONS_CEILING)
+        ),
+      );
 
   const components = { relevance, explanation, consistency, response };
+  // Sum the rounded components so the visible parts add up to the visible whole.
   const total = Math.round(
-    Math.min(1000, relevance + explanation + consistency + response) / 10,
+    (relevance + explanation + consistency + response) / 10,
   ) * 10;
 
   return { components, total };
