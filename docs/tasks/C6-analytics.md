@@ -43,17 +43,17 @@ Allowed prop keys:
 
 ```
 latency_bucket   '0-2s' | '2-10s' | '10-30s' | '30-60s' | '60s+'
-lane             'warm' | 'sync' | 'snapshot'
+lane             'warm' | 'live'
 evidence_band    'good' | 'limited' | 'directional' | 'none'
 error_class      the ProfileResult error classes, plus 'llm'
-provider         'brightdata' | 'twitterapi' | 'mock'
+provider         'twitterapi' | 'mock'
 score_bucket     '0-200' | '200-400' | '400-600' | '600-800' | '800-1000'
 opportunity_rank 1 | 2 | 3
 ```
 
-`lane` earns its place: it is how we tell, live during the event, whether the pre-warm
-actually worked. A `warm` share that collapses means the cache is missing and the queue is
-about to slow down.
+`lane` earns its place: it is how we tell, live during the event, whether the pre-warm is
+working. `warm` is a cache hit (~1 s); `live` is a real provider fetch (~7 s). A collapsing
+warm share means the cache is missing and the queue is about to slow down.
 
 `sessionId` is a random client-generated id held in `sessionStorage`. It is not a user id,
 it does not persist across sessions, and it is never joined to a participant row.

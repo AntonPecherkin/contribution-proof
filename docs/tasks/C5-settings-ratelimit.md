@@ -19,7 +19,7 @@ human standing at a booth change the application's behaviour from a phone, with 
 export type Settings = {
   analysisEnabled: boolean;
   turnstileEnabled: boolean;
-  primaryProvider: 'brightdata' | 'twitterapi' | 'mock';
+  primaryProvider: 'twitterapi' | 'mock';
   demoMode: boolean;
   maxAnalysesPerEvent: number;
   perIpHourlyCap: number;
@@ -45,7 +45,7 @@ absent, return safe defaults rather than throwing — the application must not f
 because a settings read failed:
 
 ```
-analysisEnabled: true      turnstileEnabled: false     primaryProvider: 'brightdata'
+analysisEnabled: true      turnstileEnabled: false     primaryProvider: 'twitterapi'
 demoMode: false            maxAnalysesPerEvent: 500    perIpHourlyCap: 10
 ```
 
