@@ -7,7 +7,7 @@ import type { Post } from '../src/lib/providers/types';
  * make it pass. Do not change an assertion - if you believe one is wrong, say so in the
  * PR and leave it.
  */
-describe.skip('normalizeHandle', () => {
+describe('normalizeHandle', () => {
   it('accepts every way a person might give the same account', () => {
     for (const input of [
       'jack', '@jack', '@JACK', '  jack  ', 'Jack',
@@ -52,7 +52,7 @@ describe.skip('normalizeHandle', () => {
   });
 });
 
-describe.skip('normalizeEmail', () => {
+describe('normalizeEmail', () => {
   it('trims and lowercases', () => {
     expect(normalizeEmail('  Person@Example.COM ')).toBe('person@example.com');
   });
@@ -70,7 +70,7 @@ describe.skip('normalizeEmail', () => {
   });
 });
 
-describe.skip('isEligible', () => {
+describe('isEligible', () => {
   const post = (over: Partial<Post>): Post => ({
     id: '1', text: 't', createdAt: '2026-08-01T00:00:00.000Z',
     views: 1, replies: 0, reposts: 0, likes: 0,
