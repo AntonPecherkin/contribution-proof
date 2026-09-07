@@ -201,14 +201,22 @@ The two are different measurements, kept apart by **name and placement** rather 
 anything on the card: this is a *Profile* Score, computed from a bio and profile facts, and
 it never ranks on the room board against scores derived from twenty analysed posts.
 
-Four components of 25, mirroring the main score's shape:
+Four components of 25, weighted toward size and activity:
 
-| Component | Full marks at |
+| Component | Bands |
 |---|---|
-| **Topics** | 3 technical areas in the bio |
-| **Tenure** | 5 years on X |
-| **Cadence** | 200 posts a year, log-scaled below it |
-| **Presence** | verified, plus a follower ratio far from 1 in either direction |
+| **Audience** | followers: 100 · 500 · 2k · 10k · 50k |
+| **Output** | total posts: 100 · 500 · 2k · 10k · 40k |
+| **Activity** | posts per year: 12 · 50 · 150 · 400 · 1k |
+| **Topics** | technical areas in the bio, full marks at 3 |
+
+Stepped bands rather than a log curve, because a log scale is far too generous at the bottom:
+186 followers against a 10,000 ceiling still returns 0.57, so a small account collected most
+of a component it had not earned. Below the first band a component scores zero.
+
+An earlier version paid a quarter of the score for tenure and a quarter for bio keywords, so
+a dormant six-year-old account posting seventeen times a year scored 82. **Age and vocabulary
+are not contribution.** Audience, output and rate are at least evidence of it.
 
 A missing fact scores 0 for its part rather than blocking the score — we would rather hand
 someone 41 from three parts than nothing from four. Both directions of the follower ratio

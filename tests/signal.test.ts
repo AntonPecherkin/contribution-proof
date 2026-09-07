@@ -64,24 +64,37 @@ describe('profileSignal', () => {
 
   it('sums its visible components exactly', () => {
     const r = profileSignal(profile({ bio: 'solana rust zk' }), NOW);
-    const { topics, tenure, cadence, presence } = r.components;
-    expect(topics + tenure + cadence + presence).toBe(r.profileScore);
-    for (const v of [topics, tenure, cadence, presence]) expect(v).toBeLessThanOrEqual(25);
+    const { audience, output, activity, topics } = r.components;
+    expect(audience + output + activity + topics).toBe(r.profileScore);
+    for (const v of [audience, output, activity, topics]) expect(v).toBeLessThanOrEqual(25);
   });
 
   it('still scores when facts are missing, rather than refusing', () => {
-    // Three parts and a number beats four parts and nothing.
     const r = profileSignal(profile({ joinedAt: null, postsCount: null, bio: null }), NOW);
-    expect(r.components.tenure).toBe(0);
-    expect(r.components.cadence).toBe(0);
+    expect(r.components.output).toBe(0);
+    expect(r.components.activity).toBe(0);
     expect(r.profileScore).toBeGreaterThan(0);
   });
 
-  it('credits both directions of the follower ratio', () => {
-    // Being followed is reach; following widely is participation. Neither is a shortfall.
-    const followed = profileSignal(profile({ followers: 5000, following: 100 }), NOW);
-    const following = profileSignal(profile({ followers: 100, following: 5000 }), NOW);
-    expect(followed.components.presence).toBe(following.components.presence);
+  it('scores a large active account far above a small dormant one', () => {
+    // The whole point of the reweighting. Age and bio vocabulary are not contribution.
+    const large = profileSignal(
+      profile({ followers: 60_000, postsCount: 45_000, joinedAt: '2016-01-01T00:00:00.000Z', bio: 'rust zk solana' }),
+      NOW,
+    );
+    const smallDormant = profileSignal(
+      profile({ followers: 186, postsCount: 97, joinedAt: '2016-01-01T00:00:00.000Z', bio: 'rust zk solana' }),
+      NOW,
+    );
+    expect(large.profileScore).toBeGreaterThan(smallDormant.profileScore + 40);
+  });
+
+  it('does not pay a dormant account for being old', () => {
+    // Same account, ten years apart in join date, identical output: age alone earns nothing.
+    const old = profileSignal(profile({ joinedAt: '2014-01-01T00:00:00.000Z', postsCount: 97 }), NOW);
+    const recent = profileSignal(profile({ joinedAt: '2024-01-01T00:00:00.000Z', postsCount: 97 }), NOW);
+    expect(old.components.audience).toBe(recent.components.audience);
+    expect(old.components.output).toBe(recent.components.output);
   });
 
   it('names our data source as the limit, never the person', () => {

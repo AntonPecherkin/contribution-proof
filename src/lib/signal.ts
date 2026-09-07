@@ -24,21 +24,24 @@ import type { ProfileSummary } from './providers/types';
 
 export type Signal = { id: string; label: string; detail: string };
 
-/** Four parts of 25. */
+/**
+ * Four parts of 25, weighted toward size and activity.
+ *
+ * An earlier version gave a quarter of the score for tenure and a quarter for bio keywords,
+ * so a dormant six-year-old account with three technical words in its bio scored 82 while
+ * posting seventeen times a year. Age and vocabulary are not contribution. Audience, output
+ * and rate are at least evidence of it.
+ */
 export type ProfileComponents = {
+  audience: number;
+  output: number;
+  activity: number;
   topics: number;
-  tenure: number;
-  cadence: number;
-  presence: number;
 };
 
 export const PROFILE_CAP = 25;
-/** Bio topics that earn full marks. */
+/** Bio topics that earn full marks. Weak evidence, so it is the smallest lever. */
 export const TOPIC_TARGET = 3;
-/** Years on X that earn full marks. */
-export const TENURE_TARGET = 5;
-/** Posts per year that earn full marks, log-scaled below it. */
-export const CADENCE_CEILING = 200;
 
 export type ProfileSignal = {
   profile: ProfileSummary;
@@ -65,9 +68,31 @@ const NOTE =
 const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
 
 const clampUnit = (n: number) => Math.min(1, Math.max(0, n));
-/** Saturating, so a prolific account cannot run away with the cadence component. */
-const logScale = (v: number, ceiling: number) =>
-  clampUnit(Math.log1p(Math.max(0, v)) / Math.log1p(ceiling));
+
+/**
+ * Stepped thresholds rather than a log curve.
+ *
+ * A log scale is far too generous at the bottom: 186 followers against a 10,000 ceiling
+ * still returns 0.57, so a small account collects most of the component. Steps make the
+ * bands explicit, and an account below the first band scores zero for that part instead of
+ * half of it.
+ */
+const band = (value: number | null, steps: readonly [number, number][]): number => {
+  if (value === null) return 0;
+  let earned = 0;
+  for (const [threshold, points] of steps) if (value >= threshold) earned = points;
+  return earned;
+};
+
+const FOLLOWER_BANDS: readonly [number, number][] = [
+  [100, 5], [500, 10], [2_000, 15], [10_000, 20], [50_000, 25],
+];
+const OUTPUT_BANDS: readonly [number, number][] = [
+  [100, 4], [500, 9], [2_000, 15], [10_000, 21], [40_000, 25],
+];
+const ACTIVITY_BANDS: readonly [number, number][] = [
+  [12, 4], [50, 9], [150, 15], [400, 21], [1_000, 25],
+];
 
 function headlineFor(joinedYear: number | null, topics: string[]): string {
   if (joinedYear !== null) return `Class of ${joinedYear}`;
@@ -137,20 +162,10 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
   // A missing fact scores 0 for that part rather than blocking the score: we would rather
   // hand someone 41 with three parts than nothing at all.
   const components: ProfileComponents = {
+    audience: band(profile.followers, FOLLOWER_BANDS),
+    output: band(profile.postsCount, OUTPUT_BANDS),
+    activity: band(postsPerYear, ACTIVITY_BANDS),
     topics: Math.round(PROFILE_CAP * clampUnit(topics.length / TOPIC_TARGET)),
-    tenure:
-      ageYears === null ? 0 : Math.round(PROFILE_CAP * clampUnit(ageYears / TENURE_TARGET)),
-    cadence:
-      postsPerYear === null ? 0 : Math.round(PROFILE_CAP * logScale(postsPerYear, CADENCE_CEILING)),
-    presence: Math.round(
-      PROFILE_CAP *
-        clampUnit(
-          (profile.isVerified ? 0.5 : 0) +
-            // Both directions of the ratio earn credit: being followed is reach, and
-            // following widely is participation. Neither end is a shortfall here.
-            (followerRatio === null ? 0.25 : 0.5 * logScale(Math.max(followerRatio, 1 / followerRatio), 20)),
-        ),
-    ),
   };
 
   return {
@@ -158,7 +173,7 @@ export function profileSignal(profile: ProfileSummary, now: Date = new Date()): 
     topics,
     matchedWords: [...new Set(matched)],
     profileScore:
-      components.topics + components.tenure + components.cadence + components.presence,
+      components.audience + components.output + components.activity + components.topics,
     components,
     accountAgeYears: ageYears === null ? null : Number(ageYears.toFixed(1)),
     postsPerYear,
