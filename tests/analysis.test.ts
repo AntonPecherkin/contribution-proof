@@ -12,9 +12,9 @@ const post = (id: string, over: Partial<Post> = {}): Post => ({
 
 const judged = (ids: Record<string, [boolean, number]>) => ({
   posts: Object.entries(ids).map(([id, [isTechnology, explanationRating]]) => ({
-    id, isTechnology, explanationRating, topics: [],
+    id, isTechnology, explanationRating, topics: [], matched: [],
   })),
-  powerTopics: [], narrative: '',
+  powerTopics: [],
 });
 
 describe('weekKey', () => {
@@ -56,19 +56,29 @@ describe('toScoreInput', () => {
     expect(out.viewsTotal).toBe(40);
   });
 
-  it('buckets relevant posts by week', () => {
+  it('measures the longest run of consecutive weeks', () => {
     const posts = [
       post('a', { createdAt: '2026-08-05T00:00:00.000Z' }),
       post('b', { createdAt: '2026-08-06T00:00:00.000Z' }),
       post('c', { createdAt: '2026-08-20T00:00:00.000Z' }),
     ];
     const out = toScoreInput(posts, judged({ a: [true, 1], b: [true, 1], c: [true, 1] }));
-    expect(out.activeWeeks).toBe(2);
-    expect([...out.relevantCountsByWeek].sort()).toEqual([1, 2]);
+    // Two posts in one week then a gap: the streak is one week, not two.
+    expect(out.longestStreakWeeks).toBe(1);
   });
 
   it('treats a post the model never judged as not technology', () => {
     const out = toScoreInput([post('a')], judged({}));
     expect(out.relevantCount).toBe(0);
+  });
+
+  it('counts consecutive weeks as a streak', () => {
+    const posts = [
+      post('a', { createdAt: '2026-08-03T00:00:00.000Z' }),
+      post('b', { createdAt: '2026-08-10T00:00:00.000Z' }),
+      post('c', { createdAt: '2026-08-17T00:00:00.000Z' }),
+    ];
+    const out = toScoreInput(posts, judged({ a: [true, 1], b: [true, 1], c: [true, 1] }));
+    expect(out.longestStreakWeeks).toBe(3);
   });
 });

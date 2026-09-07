@@ -1,4 +1,4 @@
-import type { Classification } from './llm/schema';
+import type { Classification } from './classify';
 import { isEligible } from './normalize';
 import type { Post } from './providers/types';
 import type { ScoreInput } from './scoring';
@@ -21,6 +21,20 @@ export function weekKey(iso: string): string {
   return monday.toISOString().slice(0, 10);
 }
 
+/** Longest run of consecutive calendar weeks in a sorted list of week keys. */
+export function longestStreak(sortedWeeks: readonly string[]): number {
+  if (sortedWeeks.length === 0) return 0;
+  const WEEK = 7 * 24 * 60 * 60 * 1000;
+  let best = 1;
+  let run = 1;
+  for (let i = 1; i < sortedWeeks.length; i += 1) {
+    const gap = new Date(sortedWeeks[i]).getTime() - new Date(sortedWeeks[i - 1]).getTime();
+    run = gap === WEEK ? run + 1 : 1;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
 export function toScoreInput(
   posts: readonly Post[],
   classification: Classification,
@@ -30,11 +44,7 @@ export function toScoreInput(
 
   const relevant = eligible.filter((p) => judgement.get(p.id)?.isTechnology === true);
 
-  const byWeek = new Map<string, number>();
-  for (const p of relevant) {
-    const key = weekKey(p.createdAt);
-    byWeek.set(key, (byWeek.get(key) ?? 0) + 1);
-  }
+  const weeks = [...new Set(relevant.map((p) => weekKey(p.createdAt)))].sort();
 
   // A metric absent on every relevant post stays absent. Summing nulls into 0 would turn
   // "the provider did not report this" into "nobody saw it", which the score treats very
@@ -48,8 +58,7 @@ export function toScoreInput(
     eligibleCount: eligible.length,
     relevantCount: relevant.length,
     explanationRatings: relevant.map((p) => judgement.get(p.id)?.explanationRating ?? 0),
-    activeWeeks: byWeek.size,
-    relevantCountsByWeek: [...byWeek.values()],
+    longestStreakWeeks: longestStreak(weeks),
     viewsTotal: sumOrNull((p) => p.views),
     conversationsTotal: sumOrNull((p) => p.replies),
   };

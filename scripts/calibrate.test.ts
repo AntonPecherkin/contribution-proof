@@ -5,8 +5,7 @@
  *   SNAPSHOT=/path/to/rows.json \
  *     npx vitest run scripts/calibrate.test.ts --exclude 'node_modules/**'
  *
- * It makes real, paid API calls, so vitest.config.ts excludes scripts/ from the normal
- * suite and running it requires the --exclude override above. That friction is deliberate.
+ * It reads a saved snapshot and makes no network calls at all.
  */
 import { readFileSync } from 'node:fs';
 import { it, vi } from 'vitest';
@@ -21,11 +20,12 @@ for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
 vi.mock('server-only', () => ({}));
 
 const { mapProfileRow } = await import('../src/lib/providers/mapping');
-const { classify } = await import('../src/lib/llm/client');
+const { classify } = await import('../src/lib/classify');
 const { toScoreInput } = await import('../src/lib/analysis');
 const { computeScore } = await import('../src/lib/scoring');
 const { evidenceBand } = await import('../src/lib/evidence');
-const { labelForTopic } = await import('../src/lib/llm/taxonomy');
+const { labelForTopic } = await import('../src/lib/taxonomy');
+const { funStats } = await import('../src/lib/stats');
 
 const SNAPSHOT = process.env.SNAPSHOT;
 
@@ -43,25 +43,25 @@ it('calibrate', { timeout: 900_000, skip: !SNAPSHOT }, async () => {
     }
 
     const t0 = Date.now();
-    const res = await classify(mapped.posts);
+    const classification = classify(mapped.posts);
     const ms = Date.now() - t0;
-    if (!res.ok) { console.log(`\n@${handle}  ->  classification failed`); continue; }
 
-    const input = toScoreInput(mapped.posts, res.classification);
+    const input = toScoreInput(mapped.posts, classification);
     const { components, total } = computeScore(input);
+    const stats = funStats(mapped.posts);
     const dates = mapped.posts.map((p) => p.createdAt.slice(0, 10)).sort();
 
-    console.log(`\n@${handle}   SCORE ${total}   (${ms}ms, cache_read ${res.cacheReadTokens})`);
+    console.log(`\n@${handle}   SCORE ${total}   (${ms}ms, no network)`);
     console.log(`  window     ${dates[0]} .. ${dates[dates.length - 1]}`);
     console.log(`  evidence   ${input.eligibleCount} eligible of ${mapped.posts.length} -> ${evidenceBand(input.eligibleCount)}`);
-    console.log(`  technology ${input.relevantCount}   weeks ${input.activeWeeks}   views ${input.viewsTotal}   convos ${input.conversationsTotal}`);
+    console.log(`  technology ${input.relevantCount}   streak ${input.longestStreakWeeks}w   views ${input.viewsTotal}   convos ${input.conversationsTotal}`);
     console.log(`  components rel=${components.relevance} exp=${components.explanation} con=${components.consistency} res=${components.response}`);
-    console.log(`  topics     ${res.classification.powerTopics.map(labelForTopic).join(', ') || '(none)'}`);
-    console.log(`  narrative  ${res.classification.narrative}`);
+    console.log(`  topics     ${classification.powerTopics.map(labelForTopic).join(', ') || '(none)'}`);
+    console.log(`  streak ${stats?.longestStreakWeeks}wk  busiest ${stats?.busiestWeekday}  median ${stats?.medianLength} chars  threads ${stats?.threadStarts}  links ${stats?.linkShareRate}`);
 
-    for (const j of res.classification.posts.filter((p) => p.isTechnology).slice(0, 4)) {
+    for (const j of classification.posts.filter((p) => p.isTechnology).slice(0, 4)) {
       const text = mapped.posts.find((p) => p.id === j.id)?.text.replace(/\s+/g, ' ').slice(0, 90);
-      console.log(`    ${j.explanationRating.toFixed(2)}  ${text}`);
+      console.log(`    ${j.explanationRating.toFixed(2)}  [${j.matched.slice(0, 3).join(' ')}]  ${text}`);
     }
   }
 });
