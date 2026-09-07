@@ -45,6 +45,24 @@ describe('normalizeHandle', () => {
     expect(normalizeHandle(cyrillic)).not.toBe('jack');
   });
 
+  it("rejects X's own pages pasted from the address bar", () => {
+    // Someone at a booth pastes whatever their browser shows. None of these is a profile,
+    // and each would otherwise become a plausible-looking handle.
+    for (const input of [
+      'x.com/home', 'x.com/explore', 'x.com/settings', 'x.com/messages',
+      'x.com/search?q=ai', 'x.com/intent/tweet?text=hi',
+      'https://x.com/i/web/status/1840000000000000', 'x.com/i/lists/123',
+    ]) {
+      expect(normalizeHandle(input), `input: ${input}`).toBeNull();
+    }
+  });
+
+  it('still accepts a reserved word typed as a bare handle', () => {
+    // The reservation belongs to the URL path, not to the namespace of names people have.
+    expect(normalizeHandle('home')).toBe('home');
+    expect(normalizeHandle('@search')).toBe('search');
+  });
+
   it('never throws, whatever it is handed', () => {
     for (const input of ['x', ' ', '../../etc/passwd', '<script>', 'a'.repeat(5000)]) {
       expect(() => normalizeHandle(input)).not.toThrow();
