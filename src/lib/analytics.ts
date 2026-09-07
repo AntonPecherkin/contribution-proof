@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { after } from 'next/server';
+
 import { getDb } from './db';
 
 export type AnalyticsEvent =
@@ -50,13 +52,13 @@ function logFailure(error: unknown): void {
   }
 }
 
-export async function track(
+async function write(
   name: AnalyticsEvent,
-  props?: Record<string, PropValue>,
-  ctx?: { eventId?: string; sessionId?: string },
+  props: Record<string, PropValue> | undefined,
+  ctx: { eventId?: string; sessionId?: string } | undefined,
 ): Promise<void> {
   try {
-    const request = getDb()
+    const { error } = await getDb()
       .from('analytics_events')
       .insert({
         name,
@@ -65,15 +67,28 @@ export async function track(
         session_id: ctx?.sessionId ?? null,
       });
 
-    void Promise.resolve(request).then(
-      ({ error }) => {
-        if (error) {
-          logFailure(error);
-        }
-      },
-      logFailure,
-    ).catch(logFailure);
+    if (error) {
+      logFailure(error);
+    }
   } catch (error) {
     logFailure(error);
+  }
+}
+
+export async function track(
+  name: AnalyticsEvent,
+  props?: Record<string, PropValue>,
+  ctx?: { eventId?: string; sessionId?: string },
+): Promise<void> {
+  // Fire-and-forget must not mean fire-and-hope. A serverless function is frozen once its
+  // response is sent, so a promise that is merely un-awaited can be killed mid-insert - and
+  // the events most likely to be lost are the last ones in a request, which is exactly where
+  // lead_registered lives. `after` hands the work to the platform to finish post-response.
+  //
+  // Outside a request scope - scripts, tests - `after` throws, so fall back to detaching.
+  try {
+    after(() => write(name, props, ctx));
+  } catch {
+    void write(name, props, ctx);
   }
 }
