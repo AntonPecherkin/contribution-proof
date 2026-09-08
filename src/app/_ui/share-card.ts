@@ -1,14 +1,39 @@
 import type { PublicResult } from '@/lib/result';
 import { labelForTopic } from '@/lib/taxonomy';
 
+/**
+ * Loads the logo, or gives up.
+ *
+ * `decode()` never settles while the tab is hidden - Chrome defers image decoding in a
+ * backgrounded tab - so awaiting it bare leaves the share button on "Preparing..." forever,
+ * with no error and nothing to retry. On a phone that is one app-switch away: tap share,
+ * glance at a notification, come back to a dead button.
+ *
+ * A card without the mark is worth far more than a card that never arrives, so this resolves
+ * null rather than throwing, and the caller draws around it.
+ */
+const LOGO_TIMEOUT_MS = 3000;
+
+async function loadLogo(): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const done = (value: HTMLImageElement | null) => {
+      clearTimeout(timer);
+      resolve(value);
+    };
+    const timer = setTimeout(() => done(null), LOGO_TIMEOUT_MS);
+    image.onload = () => done(image);
+    image.onerror = () => done(null);
+    image.src = '/contentdc-logo.png';
+  });
+}
+
 /** One self-contained square composition, sized for sharing at phone-feed scale. */
 export async function renderShareCard(result: PublicResult): Promise<Blob> {
   await document.fonts.load('700 280px Inter');
   await document.fonts.load('500 26px Inter');
   await document.fonts.ready;
-  const logo = new Image();
-  logo.src = '/contentdc-logo.png';
-  await logo.decode();
+  const logo = await loadLogo();
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 1080;
   const ctx = canvas.getContext('2d');
@@ -29,7 +54,8 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
   const analysis = result.kind === 'analysis';
   const topics = analysis ? result.powerTopics : result.signal.topics;
   box(0, 0, 1080, 1080, '#171717', 0);
-  ctx.drawImage(logo, 48, 42, 56, 56);
+  // The wordmark carries the brand on its own when the mark could not be loaded.
+  if (logo) ctx.drawImage(logo, 48, 42, 56, 56);
   text('ContentDC', 120, 83, 32, '#ffffff', 650);
   text('CONTRIBUTION PROOF', 650, 85, 20, '#b8b8b8', 500, 382);
 
