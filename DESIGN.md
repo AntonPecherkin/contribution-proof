@@ -75,3 +75,17 @@ Validate both result types, sharing, keyboard focus and mobile screenshots. Keep
 - [ ] Decide whether a share badge needs a public link; public result pages remain out of v1 scope.
 
 Effort estimates are rough, not commitments. The richer square export is implemented: purple score block, small ContentDC corner logo and three colored supporting metrics, three topics, and evidence/date/disclosure. An on-page image preview remains deferred.
+
+
+## Final polish backlog — after this draft
+Current pass adds a quiet four-stage indicator, a small tile motif on the card-free forms,
+consistent rounded inputs/actions, a subtle waiting halo, and grouped result disclosures.
+CSS transitions and existing entrances stay short; reduced motion remains fully supported.
+
+Defer until final visual review:
+- Shared score-to-tile morph and cross-route logo continuity (roughly 0.5–1 day): need
+  keyboard, reduced-motion and mobile-browser validation, so no animation dependency now.
+- On-page share-image preview using the exact export renderer (roughly 1 day).
+- Final physical-phone pass: keyboard open, large text, venue Wi-Fi, a cold provider fetch,
+  native share sheet, and frame-rate checks. Tune motion from this evidence.
+Keep copy short. No extra onboarding steps, fake percentages, confetti or mascots.
