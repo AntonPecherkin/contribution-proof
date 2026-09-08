@@ -6,6 +6,7 @@ import { getDb } from '../../../lib/db';
 import { normalizeHandle } from '../../../lib/normalize';
 import { checkAndIncrement } from '../../../lib/ratelimit';
 import { getSettings } from '../../../lib/settings';
+import { isMockApi, mockPostAnalysis } from '../_mock';
 
 /**
  * Start an analysis.
@@ -23,6 +24,8 @@ function clientIp(request: Request): string {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  if (isMockApi()) return mockPostAnalysis(request);
+
   const settings = await getSettings();
   if (!settings.analysisEnabled) {
     return NextResponse.json({ error: 'paused' }, { status: 503 });

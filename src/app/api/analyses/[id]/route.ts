@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { reviveIfStale } from '../../../../lib/analysis-runner';
 import { getDb } from '../../../../lib/db';
 import type { AnalysisStatus, PublicResult } from '../../../../lib/result';
+import { isMockApi, mockGetAnalysis } from '../../_mock';
 
 /**
  * Poll one analysis.
@@ -27,6 +28,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   const { id } = await context.params;
+  if (isMockApi()) return mockGetAnalysis(id);
 
   const { data } = await getDb()
     .from('analyses')
