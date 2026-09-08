@@ -1,9 +1,18 @@
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
-for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, { handle: 'smallbuilder', title: 'Profile Score' }]) {
-  test(`${scenario.title}: real offline API, forms, reveal, details, share`, async ({ page }) => {
+for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, { handle: 'smallbuilder', title: 'Profile Score' }, { handle: 'thinbuilder', title: 'Contribution Score' }]) {
+  test(`${scenario.title} (${scenario.handle}): real offline API, forms, reveal, details, share`, async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
+    if (scenario.handle === 'thinbuilder') await page.route('**/api/analyses/*', async route => {
+      const response = await route.fetch();
+      const body = await response.json();
+      if (body.result?.kind === 'analysis') {
+        delete body.result.peopleEngaged;
+        delete body.result.daysBuilding;
+      }
+      await route.fulfill({ response, json: body });
+    });
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
       Object.defineProperty(navigator, 'share', { configurable: true, value: () => { throw new Error('Download must not open native sharing'); } });
@@ -45,6 +54,15 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     if (scenario.handle === 'smallbuilder') await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.getByRole('button', { name: 'Explore my result' }).click();
     await expect(page.locator('.tile')).toHaveCount(4);
+    await expect(page.locator('.metric-grid')).not.toContainText('NaN');
+    if (scenario.handle === 'devbuilder') {
+      await expect(page.locator('.tile.green')).toContainText('People engaged in tech');
+      await expect(page.locator('.tile.blue')).toContainText('Days building in public');
+    }
+    if (scenario.handle === 'thinbuilder') {
+      await expect(page.locator('.tile.green')).toContainText('Technology posts');
+      await expect(page.locator('.tile.blue')).toContainText('Times your posts were seen');
+    }
     await expect(page.getByRole('button', { name: 'Download my card' })).toBeFocused();
     if (scenario.handle === 'devbuilder') {
       await expect(page.locator('.result-card .card-topics')).toBeVisible();
