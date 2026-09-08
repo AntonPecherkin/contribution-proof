@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { linkFor } from '@/lib/catalog';
@@ -15,6 +15,8 @@ export default function Result({ id }: { id: string }) {
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const shareButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (expanded) shareButton.current?.focus({ preventScroll: true }); }, [expanded]);
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState('');
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function Result({ id }: { id: string }) {
     finally { setSharing(false); }
   }
   return <section className={`result ${expanded ? 'expanded' : ''}`}>
-    <div className="result-card fade-in">
+    <div className="result-card fade-in" aria-label="Your result card">
       <p className="handle">@{result.handle}</p>
       {!expanded ? <div className="score-reveal"><p className="helper">{title}</p><h1 className="score">{result.score}</h1><p className="evidence">{evidence}</p></div> : <>
         <div className="metric-grid">
@@ -70,19 +72,20 @@ export default function Result({ id }: { id: string }) {
           {result.kind === 'analysis' ? <><div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div><div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Public views · analyzed posts</span></div><div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
       </>}
+      {expanded && topics.length > 0 && <section className="card-topics" aria-label="Power Topics"><h2>Power Topics</h2><div className="pills">{topics.slice(0, 3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div>{topics.length > 3 && <details><summary>{topics.length - 3} more topics</summary><div className="pills">{topics.slice(3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></details>}</section>}
       {result.kind === 'analysis' && <p className="helper result-window">Posts from {result.stats.from} to {result.stats.to}</p>}
     </div>
     {!expanded ? <button className="primary explore-button" onClick={() => setExpanded(true)}>Explore my result</button> : <div className="result-details fade-in">
+      <button ref={shareButton} className="primary" disabled={sharing} onClick={() => void share()}>{sharing ? 'Preparing…' : 'Share my card'}</button>
+      {shareError && <p role="alert" className="error">{shareError}</p>}
+
       {result.kind === 'profile' && <div className="pills">{result.signal.signals.map(signal => <span key={signal.id} title={signal.detail}>{signal.label}</span>)}</div>}
-      {topics.length > 0 && <section><h2>Power Topics</h2><div className="pills">{topics.map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></section>}
       <details><summary>How it adds up</summary><div className="components">{components.map(([label, value]) => <div key={label}><span>{label}</span><meter min={0} max={analysis ? 250 : 25} value={value} aria-label={label} /><span>{value}</span></div>)}</div>
         {result.kind === 'analysis' && <p className="helper">Components are mapped to the contribution range. {result.eligibleCount} eligible posts analyzed. Eligibility is approximate: replies and reposts may not be fully excluded.</p>}
         {result.kind === 'profile' && <p className="helper">{result.signal.note}</p>}
         <p className="helper">An experimental signal from public activity, not a measure of skill or worth.</p>
       </details>
       {result.kind === 'analysis' && <details><summary>More about your posts</summary><dl className="stats"><dt>Window</dt><dd>{result.stats.from} – {result.stats.to}</dd><dt>Busiest day</dt><dd>{result.stats.busiestWeekday ?? 'Not available'}</dd><dt>Median length</dt><dd>{result.stats.medianLength} characters</dd><dt>Thread starts</dt><dd>{result.stats.threadStarts}</dd></dl></details>}
-      <button className="primary" disabled={sharing} onClick={() => void share()}>{sharing ? 'Preparing…' : 'Share my card'}</button>
-      {shareError && <p role="alert" className="error">{shareError}</p>}
       {result.opportunities.length > 0 && <details><summary>Opportunities</summary><p className="helper">People here who work on what you post about</p>{result.opportunities.slice(0, 3).map(match => {
           // Some speakers have no public URL yet, so the card is only a link when it can be.
           const target = linkFor(match.project);
