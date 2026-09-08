@@ -90,7 +90,7 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
   });
 
   box(48, 632, 984, 292, '#242424');
-  text(topics.length ? 'POWER TOPICS' : 'PUBLIC PROFILE', 80, 680, 19, '#bda6da', 600);
+  text(topics.length ? 'TOPICS TO BUILD ON' : 'PUBLIC PROFILE', 80, 680, 19, '#bda6da', 600);
   if (topics.length) {
     topics.slice(0, 3).forEach((topic, i) => {
       const label = labelForTopic(topic);

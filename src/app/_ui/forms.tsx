@@ -31,9 +31,9 @@ export default function EntryForm({ id }: { id?: string }) {
       }
     } catch (e) { setError(e instanceof Error ? e.message : 'Connection interrupted. Try again.'); setBusy(false); }
   }}>
-    <div className="entry-fields"><BrandOrbit /><h1><label htmlFor="value">{register ? 'Your email' : 'Your X handle'}</label></h1>
-      <input id="value" name="value" type={register ? 'email' : 'text'} placeholder={register ? 'you@email.com' : '@yourname'} autoComplete={register ? 'email' : 'off'} autoCapitalize="none" spellCheck={false} required aria-describedby="consent" />
-      <p id="consent" className="helper">{register ? 'We’ll email you when early access opens.' : 'Up to 20 recent public posts.'}</p>
+    <div className="entry-fields"><BrandOrbit /><h1><label htmlFor="value">{register ? 'Your email' : 'Discover your contribution'}</label></h1>
+      <input id="value" name="value" aria-label={register ? 'Your email' : 'Your X handle'} type={register ? 'email' : 'text'} placeholder={register ? 'you@email.com' : '@yourname'} autoComplete={register ? 'email' : 'off'} autoCapitalize="none" spellCheck={false} required aria-describedby="consent" />
+      <p id="consent" className="helper">{register ? 'We’ll email you when early access opens.' : 'Find topics to build on and people to meet.'}</p>
       {error && <p role="alert" className="error">{error}</p>}
     </div>
     <button type="submit" className="primary" disabled={busy}>{busy ? 'One moment…' : register ? 'Agree & join early access' : 'Analyze my public posts'}</button>
