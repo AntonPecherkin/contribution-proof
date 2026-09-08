@@ -101,3 +101,12 @@ The app fits 320px phones through a 480px maximum reading width. The share expor
 Canvas fits fonts by size rather than squeezing letter widths. Share preview and download
 reuse the same rendered image. No new animation dependencies.
 Still requires physical-device/native-share and real cold-provider checks before release.
+
+
+## QR arrival copy
+Lead with “Discover your contribution” and “Find topics to build on and people to meet.”
+Result topics become “Topics to build on”; “Your next narrative starts here” invites the
+visitor to develop those topics, without claiming a generated narrative or personalized
+writing plan exists. Speaker matches become “People to meet.” Keep exact consent buttons,
+score types, evidence counts, analyzed dates and truthful fetching status.
+Physical-phone cold-run validation and first-hour board participation monitoring remain open.

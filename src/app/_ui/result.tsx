@@ -87,7 +87,7 @@ export default function Result({ id }: { id: string }) {
           {result.kind === 'analysis' ? <><div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div><div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Public views · analyzed posts</span></div><div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
       </>}
-      {expanded && topics.length > 0 && <section className="card-topics" aria-label="Power Topics"><h2>Power Topics</h2><div className="pills">{topics.slice(0, 3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div>{topics.length > 3 && <details><summary>{topics.length - 3} more topics</summary><div className="pills">{topics.slice(3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></details>}</section>}
+      {expanded && topics.length > 0 && <section className="card-topics" aria-label="Topics to build on"><h2>Topics to build on</h2><p className="helper topic-direction">Your next narrative starts here.</p><div className="pills">{topics.slice(0, 3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div>{topics.length > 3 && <details><summary>{topics.length - 3} more topics</summary><div className="pills">{topics.slice(3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></details>}</section>}
       {result.kind === 'analysis' && <p className="helper result-window">{result.stats.from} — {result.stats.to}</p>}
     </div>
     {!expanded ? <button className="primary explore-button" onClick={() => { closedHeight.current = cardRef.current?.getBoundingClientRect().height ?? 0; setExpanded(true); }}>Explore my result</button> : <div className="result-details fade-in">
@@ -102,7 +102,7 @@ export default function Result({ id }: { id: string }) {
         <p className="helper">An experimental signal from public activity, not a measure of skill or worth.</p>
       </details>
       {result.kind === 'analysis' && <details><summary>More about your posts</summary><dl className="stats"><dt>Window</dt><dd>{result.stats.from} – {result.stats.to}</dd><dt>Busiest day</dt><dd>{result.stats.busiestWeekday ?? 'Not available'}</dd><dt>Median length</dt><dd>{result.stats.medianLength} characters</dd><dt>Thread starts</dt><dd>{result.stats.threadStarts}</dd></dl></details>}
-      {result.opportunities.length > 0 && <details><summary>Opportunities</summary><p className="helper">People here who work on what you post about</p>{result.opportunities.slice(0, 3).map(match => {
+      {result.opportunities.length > 0 && <details><summary>People to meet</summary><p className="helper">Connect with people exploring your topics.</p>{result.opportunities.slice(0, 3).map(match => {
           // Some speakers have no public URL yet, so the card is only a link when it can be.
           const target = linkFor(match.project);
           const href = target && safeUrl(target) ? target : null;

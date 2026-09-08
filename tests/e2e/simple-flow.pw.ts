@@ -99,7 +99,7 @@ test('140-second collection stays usable at 360px and completes', async ({ page,
   await page.goto(`/analyzing/${id}`);
   await expect(page.getByRole('heading')).toHaveText('Collecting your public posts');
   await expect(page.getByText('This usually takes a minute or two.')).toBeVisible({ timeout: 15000 });
-  await page.getByText('What counts?', { exact: true }).click();
+  await page.getByText('What you’ll discover', { exact: true }).click();
   await expect(page.getByText(/If posts aren’t available/)).toBeVisible();
   await expect(page.getByText('Taking a little longer. Keep this page open.')).toBeVisible({ timeout: 55000 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

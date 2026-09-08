@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { readStatus, errorCopy } from './api';
-const phrases = ['Starting your analysis', 'Collecting your public posts', 'Finding your contribution signals', 'Your result is ready'];
+const phrases = ['Finding your contribution', 'Collecting your public posts', 'Finding your contribution signals', 'Your result is ready'];
 export default function Journey({ id }: { id: string }) {
   const router = useRouter();
   const [stage, setStage] = useState(0);
@@ -44,6 +44,6 @@ export default function Journey({ id }: { id: string }) {
   return <section className="journey fade-in"><h1 key={stage} className="fade-in" aria-live="polite" aria-atomic="true">{profile && stage === 2 ? 'Finding your profile signals' : phrases[stage]}</h1>
     <div className="waiting-card">{stage < 2 ? <BrandOrbit waiting /> : <div className="signal-grid fade-in">{(profile ? ['Audience', 'Output', 'Activity', 'Topics'] : ['Topics', 'Depth', 'Streak', 'Reach']).map((label, i) => <div key={label}><span aria-hidden="true">{['✳', '▦', '⠿', '◌'][i]}</span>{label}</div>)}</div>}</div>
     <p className="helper status-note" role="status">{connection || (stage < 3 && elapsed >= 60000 ? 'Taking a little longer. Keep this page open.' : stage < 3 && elapsed >= 10000 ? 'This usually takes a minute or two.' : '')}</p>
-    <details className="waiting-help"><summary>What counts?</summary><p className="helper">Topics, depth, streak, and public response in your recent posts. If posts aren’t available, we look at your profile.</p></details>
+    <details className="waiting-help"><summary>What you’ll discover</summary><p className="helper">Your contribution, topics to build on, and people to meet. If posts aren’t available, we look at your profile.</p></details>
   </section>;
 }
