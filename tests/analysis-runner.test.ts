@@ -98,6 +98,21 @@ describe('what a completed analysis writes', () => {
     expect(write?.posts_technology).toBeNull();
   });
 
+  it('never fails an account whose posts we could not read, even with no profile', async () => {
+    // A third of accounts land here. It is our limitation, not theirs, so it must always
+    // produce a result - and it must not depend on the provider having returned a profile.
+    db.from.mockImplementation(() => chainFor(queuedRow));
+    provider.fetchRecentPosts.mockResolvedValue({ ok: false, errorClass: 'no_posts_available' });
+
+    await runAnalysis('a1');
+
+    const write = completionWrite();
+    expect(write, 'no_posts_available reached the failure path').toBeDefined();
+    expect(write?.status).toBe('complete');
+    expect(write?.result_kind).toBe('profile');
+    expect(updates.some((u) => u.status === 'failed')).toBe(false);
+  });
+
   it('records the snapshot id when collection goes asynchronous', async () => {
     db.from.mockImplementation(() => chainFor(queuedRow));
     provider.fetchRecentPosts.mockResolvedValue({ ok: false, pending: true, snapshotId: 'sd_x' });

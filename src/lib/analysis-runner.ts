@@ -98,6 +98,39 @@ async function complete(id: string, result: PublicResult, lane: 'warm' | 'cold')
   });
 }
 
+/**
+ * An account whose posts we could not read is a **result**, never an error.
+ *
+ * It is roughly a third of accounts and most of the room at a developer event. Falling
+ * through to "our provider couldn't complete this request" would hand those people a
+ * failure screen for something that is entirely our limitation, so this path cannot fail:
+ * if the provider gave us no profile at all we synthesise the little we know rather than
+ * degrade to an error.
+ */
+function profileResultFor(handle: string, profile: ProfileSummary | undefined): PublicResult {
+  const known: ProfileSummary = profile ?? {
+    handle,
+    displayName: handle,
+    bio: null,
+    followers: null,
+    following: null,
+    postsCount: null,
+    joinedAt: null,
+    isVerified: false,
+    location: null,
+    externalLink: null,
+  };
+  const signal = profileSignal(known);
+  return {
+    kind: 'profile',
+    handle,
+    displayName: known.displayName || handle,
+    score: signal.profileScore,
+    signal,
+    opportunities: matchProjects(signal.topics),
+  };
+}
+
 export async function runAnalysis(id: string): Promise<void> {
   const db = getDb();
   const { data } = await db
@@ -119,22 +152,8 @@ export async function runAnalysis(id: string): Promise<void> {
       if (!resolved.ok && 'pending' in resolved) return; // still collecting; poll again later
 
       if (!resolved.ok) {
-        // A profile without posts is a result, not a failure.
-        if (resolved.errorClass === 'no_posts_available' && resolved.profile) {
-          const signal = profileSignal(resolved.profile);
-          return complete(
-            id,
-            {
-              kind: 'profile',
-              handle,
-              displayName: resolved.profile.displayName || handle,
-              score: signal.profileScore,
-              signal,
-              // Bio topics are thinner evidence, but a match is still a match.
-              opportunities: matchProjects(signal.topics),
-            },
-            'cold',
-          );
+        if (resolved.errorClass === 'no_posts_available') {
+          return complete(id, profileResultFor(handle, resolved.profile), 'cold');
         }
         return fail(id, resolved.errorClass);
       }
@@ -161,20 +180,8 @@ export async function runAnalysis(id: string): Promise<void> {
     }
 
     if (!first.ok) {
-      if (first.errorClass === 'no_posts_available' && first.profile) {
-        const signal = profileSignal(first.profile);
-        return complete(
-          id,
-          {
-            kind: 'profile',
-            handle,
-            displayName: first.profile.displayName || handle,
-            score: signal.profileScore,
-            signal,
-            opportunities: matchProjects(signal.topics),
-          },
-          'cold',
-        );
+      if (first.errorClass === 'no_posts_available') {
+        return complete(id, profileResultFor(handle, first.profile), 'cold');
       }
       return fail(id, first.errorClass);
     }
