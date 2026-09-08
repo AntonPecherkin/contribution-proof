@@ -68,3 +68,15 @@ meter { width: 100%; height: 10px; } meter::-webkit-meter-optimum-value { backgr
 @keyframes turn { to { transform: rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation: none!important; transition: none!important; } }
 @media(max-height:650px) { .entry-fields { padding-top: 35px; }.journey,.result { padding-top: 25px; } }
+
+/* Board opt-in. Deliberately quiet: it is a choice, not a call to action. */
+.opt-in {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-top: .9rem;
+  font-size: .95rem;
+  color: var(--muted, #b2b2b2);
+  cursor: pointer;
+}
+.opt-in input { width: 1.05rem; height: 1.05rem; accent-color: #a769ff; }

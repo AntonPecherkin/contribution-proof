@@ -81,7 +81,14 @@ export default function Result({ id }: { id: string }) {
       {result.kind === 'analysis' && <details><summary>More about your posts</summary><dl className="stats"><dt>Window</dt><dd>{result.stats.from} – {result.stats.to}</dd><dt>Busiest day</dt><dd>{result.stats.busiestWeekday ?? 'Not available'}</dd><dt>Median length</dt><dd>{result.stats.medianLength} characters</dd><dt>Thread starts</dt><dd>{result.stats.threadStarts}</dd></dl></details>}
       <button className="primary" disabled={sharing} onClick={() => void share()}>{sharing ? 'Preparing…' : 'Share my card'}</button>
       {shareError && <p role="alert" className="error">{shareError}</p>}
-      {result.opportunities.length > 0 && <details><summary>Opportunities</summary><p className="helper">Example catalog · event projects coming soon</p>{result.opportunities.filter(match => safeUrl(match.project.url)).slice(0, 3).map(match => <a className="opportunity" key={match.project.id} href={match.project.url} target="_blank" rel="noreferrer"><strong>{match.project.name} ↗</strong><span>{match.project.needs}</span>{match.project.sponsor && <small>Sponsored</small>}</a>)}</details>}
+      {result.opportunities.length > 0 && <details><summary>Opportunities</summary><p className="helper">People here who work on what you post about</p>{result.opportunities.slice(0, 3).map(match => {
+          // Some speakers have no public URL yet, so the card is only a link when it can be.
+          const href = safeUrl(match.project.url) ? match.project.url : null;
+          const inner = <><strong>{match.project.speaker} · {match.project.name}{href ? ' \u2197' : ''}</strong><span>{match.project.session}</span>{match.project.sponsor && <small>Sponsored</small>}</>;
+          return href
+            ? <a className="opportunity" key={match.project.id} href={href} target="_blank" rel="noreferrer">{inner}</a>
+            : <div className="opportunity" key={match.project.id}>{inner}</div>;
+        })}</details>}
       <p className="helper result-note">We’ll email you when early access opens.</p>
     </div>}
     <p className="helper ownership">Ownership not verified</p>

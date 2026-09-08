@@ -9,14 +9,16 @@ export default function EntryForm({ id }: { id?: string }) {
   const register = !!id;
   return <form className="entry fade-in" onSubmit={async event => {
     event.preventDefault(); if (busy) return;
-    const input = String(new FormData(event.currentTarget).get('value') ?? '');
+    const form = new FormData(event.currentTarget);
+    const input = String(form.get('value') ?? '');
+    const optIn = form.get('board') === 'on';
     const value = register ? normalizeEmail(input) : normalizeHandle(input);
     if (!value) { setError(register ? 'Enter a valid email.' : 'Check your X handle.'); return; }
     setBusy(true); setError('');
     try {
       const response = await fetch(register ? '/api/participants' : '/api/analyses', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(register ? { analysisId: id, email: value, consentVersion: 'explicit-early-access-button-v1', boardOptIn: false } : { handle: value, consentVersion: 'explicit-analysis-button-v1' }),
+        body: JSON.stringify(register ? { analysisId: id, email: value, consentVersion: 'explicit-early-access-button-v1', boardOptIn: optIn } : { handle: value, consentVersion: 'explicit-analysis-button-v1' }),
         signal: AbortSignal.timeout(20000),
       });
       if (!response.ok) throw new Error(response.status === 429 ? 'Too many requests. Try again shortly.' : 'Couldn’t continue. Please try again.');
