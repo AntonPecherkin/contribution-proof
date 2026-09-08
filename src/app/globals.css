@@ -80,3 +80,5 @@ meter { width: 100%; height: 10px; } meter::-webkit-meter-optimum-value { backgr
   cursor: pointer;
 }
 .opt-in input { width: 1.05rem; height: 1.05rem; accent-color: #a769ff; }
+
+.result-window { text-align: center; margin-top: 12px; font-size: 11px; }

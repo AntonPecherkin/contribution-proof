@@ -34,7 +34,7 @@ export default function Result({ id }: { id: string }) {
   if (result.kind === 'analysis' && result.eligibleCount === 0) return <section className="journey"><h1>No posts to analyze</h1><p className="helper">No score to show this time.</p><Link href="/" className="primary">Try again</Link></section>;
   const analysis = result.kind === 'analysis';
   const title = analysis ? 'Contribution Score' : 'Profile Score';
-  const evidence = result.kind === 'analysis' ? `${result.eligibleCount} posts · ${{ good: 'Good evidence', limited: 'Limited evidence', directional: 'Directional result' }[result.evidence]}` : result.signal.headline;
+  const evidence = result.kind === 'analysis' ? `${result.eligibleCount} posts · ${{ good: 'Based on your posts', limited: 'Small sample', directional: 'Very small sample' }[result.evidence]}` : result.signal.headline;
   const topics = result.kind === 'analysis' ? result.powerTopics : result.signal.topics;
   const components = result.kind === 'analysis'
     ? [['Topics', result.components.relevance], ['Depth', result.components.explanation], ['Streak', result.components.consistency], ['Reach', result.components.response]] satisfies [string, number][]
@@ -69,6 +69,7 @@ export default function Result({ id }: { id: string }) {
           {result.kind === 'analysis' ? <><div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div><div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Public views · analyzed posts</span></div><div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
       </>}
+      {result.kind === 'analysis' && <p className="helper result-window">Posts from {result.stats.from} to {result.stats.to}</p>}
     </div>
     {!expanded ? <button className="primary explore-button" onClick={() => setExpanded(true)}>Explore my result</button> : <div className="result-details fade-in">
       {result.kind === 'profile' && <div className="pills">{result.signal.signals.map(signal => <span key={signal.id} title={signal.detail}>{signal.label}</span>)}</div>}

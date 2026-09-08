@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { readStatus, errorCopy } from './api';
-const phrases = ['Starting your analysis', 'Reading your public posts', 'Finding your contribution signals', 'Your result is ready'];
+const phrases = ['Starting your analysis', 'Collecting your public posts', 'Finding your contribution signals', 'Your result is ready'];
 export default function Journey({ id }: { id: string }) {
   const router = useRouter();
   const [stage, setStage] = useState(0);
@@ -27,23 +27,23 @@ export default function Journey({ id }: { id: string }) {
     }, 100);
     async function poll() {
       try {
-        const data = await readStatus(id, controller.signal);
+        const data = await readStatus(id, AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]));
         if (stopped || controller.signal.aborted) return;
         if (data.status === 'failed') { stopped = true; setError(errorCopy(data.errorClass)); return; }
         reached = Math.max(reached, ['queued', 'fetching', 'scoring', 'complete'].indexOf(data.status));
         finished = data.status === 'complete';
         if (data.status === 'complete') setProfile(data.result.kind === 'profile');
         setConnection('');
-      } catch (e) { if (!controller.signal.aborted) setConnection(e instanceof Error ? e.message : 'Reconnecting…'); }
+      } catch { if (!stopped && !controller.signal.aborted) setConnection('Connection interrupted. Reconnecting…'); }
       if (!stopped && !finished && !controller.signal.aborted) nextPoll = setTimeout(poll, 1500);
     }
     void poll();
     return () => { stopped = true; controller.abort(); clearInterval(clock); clearTimeout(nextPoll); };
   }, [id, router]);
   if (error) return <section className="journey fade-in"><h1>Let’s try again.</h1><p role="alert" className="helper">{error}</p><Link href="/" className="primary">Try again</Link></section>;
-  return <section className="journey fade-in"><h1 key={stage} className="fade-in" role="status">{profile && stage === 2 ? 'Finding your profile signals' : phrases[stage]}</h1>
+  return <section className="journey fade-in"><h1 key={stage} className="fade-in" aria-live="polite" aria-atomic="true">{profile && stage === 2 ? 'Finding your profile signals' : phrases[stage]}</h1>
     <div className="waiting-card">{stage < 2 ? <Image className="turning-logo" src="/contentdc-logo.png" width={150} height={150} alt="" priority /> : <div className="signal-grid fade-in">{(profile ? ['Audience', 'Output', 'Activity', 'Topics'] : ['Topics', 'Depth', 'Streak', 'Reach']).map((label, i) => <div key={label}><span aria-hidden="true">{['✳', '▦', '⠿', '◌'][i]}</span>{label}</div>)}</div>}</div>
-    <p className="helper status-note" role="status">{connection || (stage < 2 && elapsed >= 60000 ? 'Still collecting. Keep this page open.' : stage < 2 && elapsed >= 10000 ? 'This usually takes a minute or two.' : '')}</p>
+    <p className="helper status-note" role="status">{connection || (stage < 3 && elapsed >= 60000 ? 'Taking a little longer. Keep this page open.' : stage < 3 && elapsed >= 10000 ? 'This usually takes a minute or two.' : '')}</p>
     <details className="waiting-help"><summary>What counts?</summary><p className="helper">Topics, depth, streak, and public response in your recent posts. If posts aren’t available, we look at your profile.</p></details>
   </section>;
 }
