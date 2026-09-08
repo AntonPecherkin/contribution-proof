@@ -42,5 +42,22 @@
   "solana-foundation": {
     "path": "/company-logos/solana-foundation.ico",
     "source": "https://solana.org/favicon.ico"
+  },
+  "cradle": {
+    "path": "/company-logos/cradle.jpg",
+    "source": "https://cradle.com.my/wp-content/uploads/2025/06/cropped-favicon2025-192x192.jpg"
+  },
+  "redotpay": {
+    "path": "/company-logos/redotpay.svg",
+    "source": "https://staticsource1.redotpay.com/web/img/logo-s.svg"
+  },
+  "socoe": {
+    "path": "/company-logos/socoe.png",
+    "source": "https://stmy.fun/borneo/partners/socoe.png",
+    "note": "Square globe mark cropped from the white-on-transparent wordmark and composited on #111114; the full-width wordmark is invisible on the white logo tile."
+  },
+  "no-limit": {
+    "path": "/company-logos/no-limit.jpg",
+    "source": "https://stmy.fun/borneo/partners/no-limit-holdings.png"
   }
 }

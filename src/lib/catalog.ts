@@ -109,7 +109,7 @@ export const CATALOG: readonly Project[] = [
 
   { id: 'no-limit', name: 'No Limit Holdings', speaker: 'Chris',
     // Anatoly judges for them too, per the tracks page.
-    session: 'No Limit Holdings', url: '', sponsor: false, unverified: true,
+    session: 'No Limit Holdings', url: 'https://nlh.xyz', sponsor: false, unverified: true,
     topics: ['mechanism-design', 'open-source'] },
   { id: 'socoe', name: 'SOCOE', speaker: 'Sam',
     session: 'Sustainability track — judging',
