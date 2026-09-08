@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { linkFor } from '@/lib/catalog';
 import type { PublicResult } from '@/lib/result';
 import { labelForTopic } from '@/lib/taxonomy';
 import { readStatus, errorCopy } from './api';
@@ -84,7 +85,8 @@ export default function Result({ id }: { id: string }) {
       {shareError && <p role="alert" className="error">{shareError}</p>}
       {result.opportunities.length > 0 && <details><summary>Opportunities</summary><p className="helper">People here who work on what you post about</p>{result.opportunities.slice(0, 3).map(match => {
           // Some speakers have no public URL yet, so the card is only a link when it can be.
-          const href = safeUrl(match.project.url) ? match.project.url : null;
+          const target = linkFor(match.project);
+          const href = target && safeUrl(target) ? target : null;
           const inner = <><strong>{match.project.speaker} · {match.project.name}{href ? ' \u2197' : ''}</strong><span>{match.project.session}</span>{match.project.sponsor && <small>Sponsored</small>}</>;
           return href
             ? <a className="opportunity" key={match.project.id} href={href} target="_blank" rel="noreferrer">{inner}</a>

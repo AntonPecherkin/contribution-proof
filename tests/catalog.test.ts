@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CATALOG, matchProjects } from '../src/lib/catalog';
+import { CATALOG, linkFor, matchProjects } from '../src/lib/catalog';
 import { TAXONOMY } from '../src/lib/taxonomy';
 
 describe('catalog', () => {
@@ -58,5 +58,19 @@ describe('catalog', () => {
     const topics = ['devtools', 'security', 'scaling'];
     expect(matchProjects(topics).map((m) => m.project.id))
       .toEqual(matchProjects(topics).map((m) => m.project.id));
+  });
+
+  it('prefers the speaker over the company, because the point is who to find', () => {
+    const withHandle = CATALOG.find((p) => p.handle)!;
+    expect(linkFor(withHandle)).toBe(`https://x.com/${withHandle.handle}`);
+  });
+
+  it('returns null rather than a dead card when there is nowhere to send anyone', () => {
+    expect(linkFor({ ...CATALOG[0], handle: undefined, url: '' })).toBeNull();
+  });
+
+  it('most entries are reachable, so the list is worth opening', () => {
+    const reachable = CATALOG.filter((p) => linkFor(p) !== null).length;
+    expect(reachable).toBeGreaterThanOrEqual(CATALOG.length - 2);
   });
 });

@@ -26,7 +26,16 @@ export type Project = {
   speaker: string;
   /** Their session, verbatim from the schedule where there is one. */
   session: string;
+  /** The project's site. Empty where we have not confirmed one. */
   url: string;
+  /**
+   * The speaker's X profile, without the @.
+   *
+   * Preferred over the website on the card: this is an X-based event, the participant is
+   * already thinking in handles, and "go find this person" is more actionable at a booth
+   * than a corporate homepage. Only handles confirmed by the organiser are listed.
+   */
+  handle?: string;
   /** Topic ids from the taxonomy. */
   topics: string[];
   sponsor: boolean;
@@ -49,7 +58,7 @@ export const CATALOG: readonly Project[] = [
     url: 'https://elfa.ai', sponsor: false,
     topics: ['language-models', 'data', 'prediction', 'creator-economy'] },
 
-  { id: 'superteam-my', name: 'Superteam MY', speaker: 'Nikki',
+  { id: 'superteam-my', handle: 'nikkideyy', name: 'Superteam MY', speaker: 'Nikki',
     session: 'Contentmaxxing', url: 'https://superteam.fun', sponsor: false,
     topics: ['open-source', 'creator-economy', 'devtools'] },
 
@@ -58,16 +67,16 @@ export const CATALOG: readonly Project[] = [
     url: 'https://meteora.ag', sponsor: false,
     topics: ['mechanism-design', 'smart-contracts', 'scaling'] },
 
-  { id: 'monkedao', name: 'MonkeDAO', speaker: 'Jemmy',
+  { id: 'monkedao', handle: 'jemmmyjemm', name: 'MonkeDAO', speaker: 'Jemmy',
     session: 'MonkeDAO — community-led building',
     url: 'https://monkedao.io', sponsor: false,
     topics: ['open-source', 'consensus', 'mechanism-design', 'creator-economy'] },
 
-  { id: 'sanctum', name: 'Sanctum', speaker: 'Nic',
+  { id: 'sanctum', handle: 'NicFury', name: 'Sanctum', speaker: 'Nic',
     session: 'Sanctum', url: 'https://sanctum.so', sponsor: false,
     topics: ['consensus', 'mechanism-design', 'payments'] },
 
-  { id: 'getblock', name: 'GetBlock', speaker: 'Vasily',
+  { id: 'getblock', handle: 'GetVasily', name: 'GetBlock', speaker: 'Vasily',
     session: 'GetBlock', url: 'https://getblock.io', sponsor: false,
     topics: ['scaling', 'devtools', 'data'] },
 
@@ -80,13 +89,14 @@ export const CATALOG: readonly Project[] = [
     session: 'Go-to-market done right', url: 'https://rarible.com', sponsor: false,
     topics: ['smart-contracts', 'creator-economy'] },
 
-  { id: 'kyzzen', name: 'Kyzzen', speaker: 'OhMeOhMy',
-    session: 'Kyzzen', url: 'https://kyzzen.io', sponsor: false, unverified: true,
+  { id: 'kyzzen', handle: 'OhMeOhMy_Sol', name: 'Kyzzen', speaker: 'OhMeOhMy',
+    session: 'Kyzzen', url: 'https://www.kyzzen.io', sponsor: false,
     topics: ['data', 'creator-economy', 'mechanism-design'] },
 
   { id: 'cradle', name: 'Cradle', speaker: 'Faiz',
-    session: 'Cradle', url: '', sponsor: false, unverified: true,
-    topics: ['open-source', 'devtools'] },
+    session: 'Cradle', url: 'https://cradle.com.my', sponsor: false,
+    // Malaysia's government startup funding agency: grants, ecosystem, hackathons.
+    topics: ['open-source', 'mechanism-design'] },
 
   { id: 'content', name: 'Content', speaker: 'Joyce',
     session: 'Contentmaxxing', url: '', sponsor: false, unverified: true,
@@ -112,6 +122,14 @@ export const CATALOG: readonly Project[] = [
  * Fill the empty `url` fields, and set `sponsor: true` on whoever is actually sponsoring.
  * Nothing here reads sponsorship from anywhere else.
  *
+ * STILL TO CONFIRM: two entries have no link at all - Content (Joyce) and No Limit Holdings
+ * (Chris) - and their topics remain inferred from a name and a session title. A card with no
+ * link is a dead end at a booth, and a wrong topic sends someone to the wrong table. Both are
+ * a two-minute fix for anyone who knows the line-up.
+ *
+ * Speaker handles come from the organiser's own list rather than from searching, which is why
+ * only five are present. Adding the remaining eight would make every card land on a person.
+ *
  * COVERAGE: 12 of 17 topics have someone to talk to. Nobody covers cryptography and
  * zero-knowledge, machine learning systems, security and auditing, hardware and performance,
  * or decentralized identity and privacy. A participant whose power topics fall entirely in
@@ -120,6 +138,18 @@ export const CATALOG: readonly Project[] = [
  * security-focused attendee will be told there is nobody here for them.
  */
 const KNOWN = new Set(TAXONOMY.map((t) => t.id));
+
+/**
+ * Where a card should send someone.
+ *
+ * The speaker's X profile wins: this is an X-based event, the participant arrived by typing
+ * a handle, and "go find this person" is a more actionable instruction at a booth than a
+ * corporate homepage. Returns null rather than a dead card when we have neither.
+ */
+export function linkFor(project: Project): string | null {
+  if (project.handle) return `https://x.com/${project.handle}`;
+  return project.url || null;
+}
 
 function strengthOf(overlapCount: number, participantTopics: number): Match['strength'] {
   if (overlapCount >= 3 || (overlapCount >= 2 && participantTopics <= 3)) return 'strong';
