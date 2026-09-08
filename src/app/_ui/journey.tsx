@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+import BrandOrbit from './brand-orbit';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -42,7 +42,7 @@ export default function Journey({ id }: { id: string }) {
   }, [id, router]);
   if (error) return <section className="journey fade-in"><h1>Let’s try again.</h1><p role="alert" className="helper">{error}</p><Link href="/" className="primary">Try again</Link></section>;
   return <section className="journey fade-in"><h1 key={stage} className="fade-in" aria-live="polite" aria-atomic="true">{profile && stage === 2 ? 'Finding your profile signals' : phrases[stage]}</h1>
-    <div className="waiting-card">{stage < 2 ? <Image className="turning-logo" src="/contentdc-logo.png" width={150} height={150} alt="" priority /> : <div className="signal-grid fade-in">{(profile ? ['Audience', 'Output', 'Activity', 'Topics'] : ['Topics', 'Depth', 'Streak', 'Reach']).map((label, i) => <div key={label}><span aria-hidden="true">{['✳', '▦', '⠿', '◌'][i]}</span>{label}</div>)}</div>}</div>
+    <div className="waiting-card">{stage < 2 ? <BrandOrbit waiting /> : <div className="signal-grid fade-in">{(profile ? ['Audience', 'Output', 'Activity', 'Topics'] : ['Topics', 'Depth', 'Streak', 'Reach']).map((label, i) => <div key={label}><span aria-hidden="true">{['✳', '▦', '⠿', '◌'][i]}</span>{label}</div>)}</div>}</div>
     <p className="helper status-note" role="status">{connection || (stage < 3 && elapsed >= 60000 ? 'Taking a little longer. Keep this page open.' : stage < 3 && elapsed >= 10000 ? 'This usually takes a minute or two.' : '')}</p>
     <details className="waiting-help"><summary>What counts?</summary><p className="helper">Topics, depth, streak, and public response in your recent posts. If posts aren’t available, we look at your profile.</p></details>
   </section>;

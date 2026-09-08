@@ -89,3 +89,15 @@ Defer until final visual review:
 - Final physical-phone pass: keyboard open, large text, venue Wi-Fi, a cold provider fetch,
   native share sheet, and frame-rate checks. Tune motion from this evidence.
 Keep copy short. No extra onboarding steps, fake percentages, confetti or mascots.
+
+
+## Final mobile direction — 2026-09-08
+Supersedes the earlier colored entry motif: use the supplied logo with three small stars.
+Center the initial score, handle, evidence and dates. Open the result with a 480ms measured
+height transition and staggered tiles; reduced motion skips both. Logo float and star glow
+are decorative, not progress. Keep real stage/polling behavior unchanged.
+The app fits 320px phones through a 480px maximum reading width. The share export remains
+1080×1080; the on-page preview uses its intrinsic square ratio, never a fixed portrait height.
+Canvas fits fonts by size rather than squeezing letter widths. Share preview and download
+reuse the same rendered image. No new animation dependencies.
+Still requires physical-device/native-share and real cold-provider checks before release.

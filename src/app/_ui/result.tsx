@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { linkFor } from '@/lib/catalog';
 import type { PublicResult } from '@/lib/result';
@@ -16,6 +17,29 @@ export default function Result({ id }: { id: string }) {
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const closedHeight = useRef(0);
+  const [shareImage, setShareImage] = useState<{ blob: Blob; url: string } | null>(null);
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!expanded || !card || !closedHeight.current || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const animation = card.animate(
+      [{ height: `${closedHeight.current}px` }, { height: `${card.getBoundingClientRect().height}px` }],
+      { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' },
+    );
+    return () => animation.cancel();
+  }, [expanded]);
+  useEffect(() => {
+    if (!expanded || !result) return;
+    let cancelled = false;
+    let url: string | undefined;
+    void renderShareCard(result).then(blob => {
+      if (cancelled) return;
+      url = URL.createObjectURL(blob);
+      setShareImage({ blob, url });
+    }).catch(() => { /* Sharing can retry if preparing the optional preview fails. */ });
+    return () => { cancelled = true; if (url) URL.revokeObjectURL(url); };
+  }, [expanded, result]);
   const shareButton = useRef<HTMLButtonElement>(null);
   useEffect(() => { if (expanded) shareButton.current?.focus({ preventScroll: true }); }, [expanded]);
   const [sharing, setSharing] = useState(false);
@@ -38,7 +62,7 @@ export default function Result({ id }: { id: string }) {
   if (result.kind === 'analysis' && result.eligibleCount === 0) return <section className="journey"><h1>No posts to analyze</h1><p className="helper">No score to show this time.</p><Link href="/" className="primary">Try again</Link></section>;
   const analysis = result.kind === 'analysis';
   const title = analysis ? 'Contribution Score' : 'Profile Score';
-  const evidence = result.kind === 'analysis' ? `${result.eligibleCount} posts · ${{ good: 'Based on your posts', limited: 'Small sample', directional: 'Very small sample' }[result.evidence]}` : result.signal.headline;
+  const evidence = result.kind === 'analysis' ? `${result.eligibleCount} posts analyzed${result.evidence === 'good' ? '' : result.evidence === 'limited' ? ' · Small sample' : ' · Very small sample'}` : result.signal.headline;
   const topics = result.kind === 'analysis' ? result.powerTopics : result.signal.topics;
   const components = result.kind === 'analysis'
     ? [['Topics', result.components.relevance], ['Depth', result.components.explanation], ['Streak', result.components.consistency], ['Reach', result.components.response]] satisfies [string, number][]
@@ -47,7 +71,7 @@ export default function Result({ id }: { id: string }) {
     if (!result || sharing) return;
     setSharing(true); setShareError('');
     try {
-      const blob = await renderShareCard(result);
+      const blob = shareImage?.blob ?? await renderShareCard(result);
       const file = new File([blob], 'contribution-proof.png', { type: 'image/png' });
       if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'My contribution' }); }
       else { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
@@ -55,20 +79,21 @@ export default function Result({ id }: { id: string }) {
     finally { setSharing(false); }
   }
   return <section className={`result ${expanded ? 'expanded' : ''}`}>
-    <div className="result-card fade-in" aria-label="Your result card">
+    <div ref={cardRef} className="result-card fade-in" aria-label="Your result card">
       <p className="handle">@{result.handle}</p>
-      {!expanded ? <div className="score-reveal"><p className="helper">{title}</p><h1 className="score">{result.score}</h1><p className="evidence">{evidence}</p></div> : <>
+      {!expanded ? <div className="score-reveal"><div className="reveal-stars" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div><p className="helper">{title}</p><h1 className="score">{result.score}</h1><p className="evidence">{evidence}</p></div> : <>
         <div className="metric-grid">
           <div className="tile purple"><strong>{result.score}</strong><span>{title}</span></div>
           {result.kind === 'analysis' ? <><div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div><div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Public views · analyzed posts</span></div><div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
       </>}
       {expanded && topics.length > 0 && <section className="card-topics" aria-label="Power Topics"><h2>Power Topics</h2><div className="pills">{topics.slice(0, 3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div>{topics.length > 3 && <details><summary>{topics.length - 3} more topics</summary><div className="pills">{topics.slice(3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></details>}</section>}
-      {result.kind === 'analysis' && <p className="helper result-window">Posts from {result.stats.from} to {result.stats.to}</p>}
+      {result.kind === 'analysis' && <p className="helper result-window">{result.stats.from} — {result.stats.to}</p>}
     </div>
-    {!expanded ? <button className="primary explore-button" onClick={() => setExpanded(true)}>Explore my result</button> : <div className="result-details fade-in">
+    {!expanded ? <button className="primary explore-button" onClick={() => { closedHeight.current = cardRef.current?.getBoundingClientRect().height ?? 0; setExpanded(true); }}>Explore my result</button> : <div className="result-details fade-in">
       <button ref={shareButton} className="primary" disabled={sharing} onClick={() => void share()}>{sharing ? 'Preparing…' : 'Share my card'}</button>
       {shareError && <p role="alert" className="error">{shareError}</p>}
+      {shareImage && <details className="share-preview"><summary>Preview share image</summary><Image src={shareImage.url} width={1080} height={1080} unoptimized alt="Your square share card" /></details>}
 
       {result.kind === 'profile' && <div className="pills">{result.signal.signals.map(signal => <span key={signal.id} title={signal.detail}>{signal.label}</span>)}</div>}
       <details><summary>How it adds up</summary><div className="components">{components.map(([label, value]) => <div key={label}><span>{label}</span><meter min={0} max={analysis ? 250 : 25} value={value} aria-label={label} /><span>{value}</span></div>)}</div>
