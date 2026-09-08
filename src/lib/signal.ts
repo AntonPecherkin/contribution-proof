@@ -66,8 +66,6 @@ const NOTE =
 
 const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
 
-const clampUnit = (n: number) => Math.min(1, Math.max(0, n));
-
 /**
  * Stepped thresholds rather than a log curve.
  *

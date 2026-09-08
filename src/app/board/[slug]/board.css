@@ -1,0 +1,129 @@
+/*
+ * Board styles, scoped to this route so the participant UI can own globals.css without
+ * either of us stepping on the other.
+ *
+ * Sized for a projector read from across a room: everything scales with viewport width, so
+ * it fills a 1080p screen and a 4K one identically. Nothing here is sized in pixels.
+ */
+
+.board {
+  --bg: #151515;
+  --panel: #202020;
+  --muted: #b2b2b2;
+  --line: #393939;
+  --purple: #a769ff;
+  --yellow: #f0d600;
+
+  height: 100vh;
+  overflow: hidden;
+  padding: 3vh 4vw;
+  background: var(--bg);
+  color: #f6f6f6;
+  font-family: Inter, system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4vh;
+}
+
+/*
+ * The mark sits on the baseline of the eyebrow rather than above it, so it reads as part of
+ * the same line from across a room instead of as a second element competing for attention.
+ */
+.board-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.2vw;
+  margin-bottom: 1.4vh;
+}
+.board-brand img {
+  width: 3.6vw;
+  height: 3.6vw;
+  object-fit: contain;
+}
+
+.board-eyebrow {
+  margin: 0;
+  font-size: 1.6vw;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.board-totals {
+  display: flex;
+  gap: 6vw;
+  margin: 0;
+}
+.board-totals div { display: flex; flex-direction: column-reverse; }
+.board-totals dd {
+  margin: 0;
+  font-size: 5vw;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--yellow);
+  /* Tabular figures stop the totals jittering as they tick up every five seconds. */
+  font-variant-numeric: tabular-nums;
+}
+.board-totals dt {
+  font-size: 1.3vw;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.board-columns {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 4vw;
+  border-top: 1px solid var(--line);
+  padding-top: 2vh;
+  min-height: 0;
+}
+.board-columns h2 {
+  margin: 0 0 1.5vh;
+  font-size: 1.4vw;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+.board-columns ul { margin: 0; padding: 0; list-style: none; }
+
+.board-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4vw;
+  padding: 1vh 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 2vw;
+  /* New rows arrive rather than appear. */
+  animation: board-in 420ms ease-out both;
+}
+@keyframes board-in {
+  from { opacity: 0; transform: translateY(-0.6em); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-row { animation: none; }
+}
+
+.board-rank { color: var(--muted); min-width: 2ch; }
+.board-handle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-score { font-weight: 700; margin-left: auto; font-variant-numeric: tabular-nums; color: var(--yellow); }
+.board-topic {
+  font-size: 1.15vw;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.board-empty {
+  margin: 2vh 0 0;
+  font-size: 1.7vw;
+  color: var(--muted);
+}
+
+.board-foot { border-top: 1px solid var(--line); padding-top: 1.6vh; flex-shrink: 0; }
+.board-topics { margin: 0 0 0.6vh; font-size: 1.5vw; color: var(--purple); }
+.board-note { margin: 0; font-size: 1.1vw; color: var(--muted); }

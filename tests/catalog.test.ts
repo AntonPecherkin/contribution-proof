@@ -25,16 +25,33 @@ describe('catalog', () => {
   });
 
   it('explains itself by returning the shared topics', () => {
-    const [first] = matchProjects(['cryptography']);
-    expect(first.overlap).toContain('cryptography');
+    const [first] = matchProjects(['creator-economy']);
+    expect(first.overlap).toContain('creator-economy');
   });
 
   it('gives a sponsor no ranking advantage', () => {
-    // A sponsored entry with one overlap must lose to an unsponsored one with two.
     const m = matchProjects(['payments', 'security', 'smart-contracts']);
     const sponsored = m.findIndex((x) => x.project.sponsor);
     const better = m.findIndex((x) => !x.project.sponsor && x.overlap.length >= 2);
     if (sponsored >= 0 && better >= 0) expect(better).toBeLessThan(sponsored);
+  });
+
+  it('names a person for every entry, because the point is who to go and talk to', () => {
+    for (const p of CATALOG) {
+      expect(p.speaker.length, p.id).toBeGreaterThan(1);
+      expect(p.name.length, p.id).toBeGreaterThan(1);
+    }
+  });
+
+  it('covers enough of the taxonomy that a typical participant matches something', () => {
+    // Every measured account's power topics must find at least one person to talk to.
+    const measured = [
+      ['open-source', 'identity', 'mechanism-design', 'scaling', 'creator-economy'],
+      ['scaling', 'open-source', 'devtools', 'smart-contracts', 'performance'],
+      ['prediction', 'open-source', 'consensus', 'scaling', 'mechanism-design'],
+      ['creator-economy', 'ml-systems', 'language-models'],
+    ];
+    for (const topics of measured) expect(matchProjects(topics).length).toBeGreaterThan(0);
   });
 
   it('is stable across calls, so a refresh does not reshuffle the result', () => {
