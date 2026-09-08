@@ -108,8 +108,23 @@ export const CATALOG: readonly Project[] = [
     topics: ['open-source', 'mechanism-design'] },
 
   { id: 'no-limit', name: 'No Limit Holdings', speaker: 'Chris',
+    // Anatoly judges for them too, per the tracks page.
     session: 'No Limit Holdings', url: '', sponsor: false, unverified: true,
     topics: ['mechanism-design', 'open-source'] },
+  { id: 'socoe', name: 'SOCOE', speaker: 'Sam',
+    session: 'Sustainability track — judging',
+    url: 'https://www.linkedin.com/company/socoe', sponsor: true,
+    // Kuching-based; runs Startup Village Borneo with the Solana Foundation and Superteam.
+    topics: ['sustainability', 'open-source', 'identity'] },
+
+  { id: 'solana-foundation', name: 'Solana Foundation', speaker: 'Chaerin',
+    session: 'Judging & mentoring', url: 'https://solana.org', sponsor: false,
+    topics: ['scaling', 'consensus', 'open-source', 'devtools'] },
+
+  { id: 'redotpay', name: 'RedotPay', speaker: 'RedotPay',
+    session: 'Card quiz — virtual cards', url: 'https://redotpay.com', sponsor: true,
+    topics: ['payments', 'identity'] },
+
 ] as const;
 
 /*
@@ -130,12 +145,10 @@ export const CATALOG: readonly Project[] = [
  * Speaker handles come from the organiser's own list rather than from searching, which is why
  * only five are present. Adding the remaining eight would make every card land on a person.
  *
- * COVERAGE: 12 of 17 topics have someone to talk to. Nobody covers cryptography and
- * zero-knowledge, machine learning systems, security and auditing, hardware and performance,
- * or decentralized identity and privacy. A participant whose power topics fall entirely in
- * that gap receives no opportunities at all - which is honest, but it is a blank space on
- * their result page. Either add people who cover those areas, or accept that a
- * security-focused attendee will be told there is nobody here for them.
+ * COVERAGE: 14 of 18 topics have someone to talk to. Nobody covers cryptography and
+ * zero-knowledge, machine learning systems, security and auditing, or hardware and
+ * performance. A participant whose power topics fall entirely in that gap receives no
+ * opportunities at all - honest, but a blank space on their result page.
  */
 const KNOWN = new Set(TAXONOMY.map((t) => t.id));
 
