@@ -1,0 +1,63 @@
+{
+  "elfa": {
+    "path": "/company-logos/elfa.png",
+    "source": "https://elfa.ai/icon.png?icon.6c808fcd.png"
+  },
+  "superteam-my": {
+    "path": "/company-logos/superteam-my.png",
+    "source": "https://superteam.fun/st-favicon.png"
+  },
+  "meteora": {
+    "path": "/company-logos/meteora.svg",
+    "source": "https://meteora.ag/icons/v2.svg"
+  },
+  "monkedao": {
+    "path": "/company-logos/monkedao.png",
+    "source": "https://framerusercontent.com/images/Zb2kvdp0Jrq5DkgH9bPAqnZT8FI.png"
+  },
+  "sanctum": {
+    "path": "/company-logos/sanctum.ico",
+    "source": "https://sanctum.so/favicon.ico"
+  },
+  "getblock": {
+    "path": "/company-logos/getblock.png",
+    "source": "https://getblock.io/favicon.png"
+  },
+  "virtuals": {
+    "path": "/company-logos/virtuals.ico",
+    "source": "https://virtuals.io/favicon.ico"
+  },
+  "rarible": {
+    "path": "/company-logos/rarible.ico",
+    "source": "https://rarible.com/favicon.ico?favicon.a7f86720.ico"
+  },
+  "kyzzen": {
+    "path": "/company-logos/kyzzen.png",
+    "source": "https://www.kyzzen.io/icon.png?efc1d98401a8bf63"
+  },
+  "superscrypt": {
+    "path": "/company-logos/superscrypt.png",
+    "source": "https://www.superscrypt.xyz/wp-content/uploads/2022/09/Superscrypt-Logo-S.png"
+  },
+  "solana-foundation": {
+    "path": "/company-logos/solana-foundation.ico",
+    "source": "https://solana.org/favicon.ico"
+  },
+  "cradle": {
+    "path": "/company-logos/cradle.jpg",
+    "source": "https://cradle.com.my/wp-content/uploads/2025/06/cropped-favicon2025-192x192.jpg"
+  },
+  "redotpay": {
+    "path": "/company-logos/redotpay.svg",
+    "source": "https://staticsource1.redotpay.com/web/img/logo-s.svg"
+  },
+  "socoe": {
+    "path": "/company-logos/socoe.png",
+    "source": "https://stmy.fun/borneo/partners/socoe.png",
+    "note": "Square globe mark cropped from the white-on-transparent wordmark and composited on #111114; the full-width wordmark is invisible on the white logo tile."
+  },
+  "no-limit": {
+    "path": "/company-logos/no-limit.jpg",
+    "source": "https://stmy.fun/borneo/partners/no-limit-holdings.png"
+  }
+}

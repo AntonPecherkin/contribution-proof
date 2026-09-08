@@ -110,3 +110,28 @@ visitor to develop those topics, without claiming a generated narrative or perso
 writing plan exists. Speaker matches become “People to meet.” Keep exact consent buttons,
 score types, evidence counts, analyzed dates and truthful fetching status.
 Physical-phone cold-run validation and first-hour board participation monitoring remain open.
+
+
+Entry copy guardrail: the benefit headline is separate from the visible, associated
+“Your X handle” label. Do not override that label with aria-label. Keep the helper
+“Your X handle · up to 20 recent public posts.” visible after focus and typing.
+Browser checks assert visible label and scope, not only the accessible field name.
+
+
+## Download and opportunity handoff
+“My card” and “Trends” are URL-addressable views of the same result; the two-link navigation
+preserves access to both. After exploring the card, Download saves the pre-rendered PNG
+synchronously using a download link; never substitute the native share sheet. Preparing an
+image has a deadline and retry. Keep the Blob URL alive while the result is mounted.
+Trends presents three company cards with locally stored official website icons (provenance:
+`public/company-logos/sources.json`), company names, session context and a topic connection.
+Use existing matches first. Fill short lists with known companies explicitly labeled
+“Also worth exploring”; these are not fabricated personal matches or measured market trends.
+The ContentDC paid-offers CTA links to `https://contentdc.com` as requested; do not imply
+that recommended companies guarantee jobs, payment, eligibility or a reward.
+
+### Live room display
+
+Projector board uses a rotating 12-second participant spotlight, three large aggregate totals, top contributions, room topics and recent arrivals. New opted-in arrivals briefly take the spotlight; unchanged polls do not replay entrances. Lightweight CSS entrances and a live-status pulse respect reduced motion. Failed requests retain the last good board and show Reconnecting; empty rooms show an invitation without invented participants. Identity ownership remains explicitly unverified. No backend payload or consent changes.
+
+Later: add an event-specific QR beside the invitation and tune type sizes on the actual venue projector. Keep longer ambient animation optional; validate visibility from the back of the room first.
