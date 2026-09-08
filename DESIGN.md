@@ -129,3 +129,9 @@ Use existing matches first. Fill short lists with known companies explicitly lab
 “Also worth exploring”; these are not fabricated personal matches or measured market trends.
 The ContentDC paid-offers CTA links to `https://contentdc.com` as requested; do not imply
 that recommended companies guarantee jobs, payment, eligibility or a reward.
+
+### Live room display
+
+Projector board uses a rotating 12-second participant spotlight, three large aggregate totals, top contributions, room topics and recent arrivals. New opted-in arrivals briefly take the spotlight; unchanged polls do not replay entrances. Lightweight CSS entrances and a live-status pulse respect reduced motion. Failed requests retain the last good board and show Reconnecting; empty rooms show an invitation without invented participants. Identity ownership remains explicitly unverified. No backend payload or consent changes.
+
+Later: add an event-specific QR beside the invitation and tune type sizes on the actual venue projector. Keep longer ambient animation optional; validate visibility from the back of the room first.
