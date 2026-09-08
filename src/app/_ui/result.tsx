@@ -6,6 +6,7 @@ import { linkFor } from '@/lib/catalog';
 import type { PublicResult } from '@/lib/result';
 import { labelForTopic } from '@/lib/taxonomy';
 import { readStatus, errorCopy } from './api';
+import { renderShareCard } from './share-card';
 
 const metric = (n: number | null) => n === null ? 'Not available' : new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 const safeUrl = (url: string) => { try { return ['https:', 'http:'].includes(new URL(url).protocol); } catch { return false; } };
@@ -46,17 +47,7 @@ export default function Result({ id }: { id: string }) {
     if (!result || sharing) return;
     setSharing(true); setShareError('');
     try {
-      await document.fonts.ready;
-      const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1080;
-      const ctx = canvas.getContext('2d'); if (!ctx) throw new Error('Canvas unavailable');
-      ctx.fillStyle = '#171717'; ctx.fillRect(0, 0, 1080, 1080);
-      ctx.fillStyle = '#fff'; ctx.font = '500 40px Inter'; ctx.fillText('ContentDC · Contribution Proof', 72, 110);
-      ctx.font = '400 32px Inter'; ctx.fillText(`@${result.handle}`, 72, 210); ctx.fillText(title, 72, 320);
-      ctx.fillStyle = '#b479ff'; ctx.font = '700 240px Inter'; ctx.fillText(String(result.score), 60, 590);
-      ctx.fillStyle = '#fff'; ctx.font = '400 34px Inter'; ctx.fillText(evidence, 72, 710);
-      ctx.font = '400 24px Inter'; topics.slice(0, 3).forEach((topic, i) => ctx.fillText(labelForTopic(topic), 72, 790 + i * 38));
-      ctx.fillStyle = '#b2b2b2'; ctx.font = '400 22px Inter'; ctx.fillText('Experimental · X ownership not verified', 72, 990);
-      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Image failed')), 'image/png'));
+      const blob = await renderShareCard(result);
       const file = new File([blob], 'contribution-proof.png', { type: 'image/png' });
       if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'My contribution' }); }
       else { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }

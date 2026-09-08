@@ -74,4 +74,4 @@ Validate both result types, sharing, keyboard focus and mobile screenshots. Keep
   Default next iteration: square only to bound cost.
 - [ ] Decide whether a share badge needs a public link; public result pages remain out of v1 scope.
 
-Effort estimates are rough, not commitments. No badge preview or richer export is implemented in this pass.
+Effort estimates are rough, not commitments. The richer square export is implemented: purple score block, ContentDC logo on green, one blue supporting metric, three topics, and evidence/date/disclosure. An on-page image preview remains deferred.
