@@ -7,6 +7,8 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     await expect(page.getByText('Ownership not verified')).toHaveCount(0);
     await expect(page.getByRole('checkbox')).toHaveCount(0);
     expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('Inter');
+    await expect(page.locator('.entry-art')).toHaveCount(0);
+    await expect(page.locator('.hero-logo')).toBeVisible();
     await page.getByLabel('Your X handle').fill(scenario.handle);
     await page.screenshot({ path: `test-results/${scenario.handle}-handle.png`, fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Analyze my public posts' }).click();
@@ -22,6 +24,12 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     await expect(page.getByText(scenario.title, { exact: true })).toBeVisible();
     await expect(page.locator('.score')).toHaveText(/^\d+$/);
     await expect(page.locator('.metric-grid')).toHaveCount(0);
+    const alignment = await page.locator('.score').evaluate(el => {
+      const score = el.getBoundingClientRect();
+      const card = el.closest('.result-card')!.getBoundingClientRect();
+      return Math.abs((score.left + score.right) / 2 - (card.left + card.right) / 2);
+    });
+    expect(alignment).toBeLessThan(1);
     await page.screenshot({ path: `test-results/${scenario.handle}-reveal.png`, fullPage: true, animations: 'disabled' });
     if (scenario.handle === 'smallbuilder') await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.getByRole('button', { name: 'Explore my result' }).click();
@@ -36,6 +44,18 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     await expect(page.getByText('Ownership not verified')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `test-results/${scenario.handle}-result.png`, fullPage: true, animations: 'disabled' });
+    await page.getByText('Preview share image', { exact: true }).click();
+    const preview = page.getByAltText('Your square share card');
+    await expect(preview).toBeVisible();
+    for (const width of [320, 390, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      const size = await preview.evaluate(el => ({ width: el.getBoundingClientRect().width, height: el.getBoundingClientRect().height }));
+      expect(Math.abs(size.width - size.height)).toBeLessThan(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await preview.screenshot({ path: `test-results/${scenario.handle}-share-preview.png` });
+    await page.getByText('Preview share image', { exact: true }).click();
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Share my card' }).click();
     const card = await download;

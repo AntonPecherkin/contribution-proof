@@ -49,7 +49,7 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
     while (ctx.measureText(value).width > width && size > 16) {
       size--; ctx.font = `${weight} ${size}px Inter`;
     }
-    ctx.fillText(value, x, y, width);
+    ctx.fillText(value, x, y);
   };
   const analysis = result.kind === 'analysis';
   const topics = analysis ? result.powerTopics : result.signal.topics;
