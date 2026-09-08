@@ -23,7 +23,7 @@ export type Topic = {
   readonly keywords: readonly string[];
 };
 
-export const TAXONOMY_VERSION = '1.1.0';
+export const TAXONOMY_VERSION = '1.2.0';
 
 export const TAXONOMY: readonly Topic[] = [
   {
@@ -516,6 +516,19 @@ export const TAXONOMY: readonly Topic[] = [
       'payment','payout','stablecoin','usdc','usdt','settlement','remittance','invoice',
       'checkout','merchant','fiat','on-ramp','off-ramp','payment rail','chargeback',
       'micropayment','escrow',
+    ],
+  },
+  {
+    id: 'sustainability',
+    label: 'Sustainability and climate',
+    short: 'Sustainability',
+    definition: 'Energy, emissions, environmental measurement, and the systems that account for them.',
+    counts: 'Explaining how a carbon credit is verified, and what makes the measurement contestable.',
+    doesNotCount: 'Calling a product green with no measurement behind it.',
+    keywords: [
+      'sustainab','carbon','emission','climate','renewable','net zero','net-zero',
+      'carbon credit','offset','esg','circular economy','biodiversity','reforest',
+      'clean energy','solar','environmental','decarboniz','green tech',
     ],
   },
   {
