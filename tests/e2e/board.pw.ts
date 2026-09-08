@@ -5,7 +5,7 @@ test('projector board fits, protects opt-out identities and rotates spotlight', 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/board/demo');
   await expect(page.getByText('Live room', { exact: true })).toBeVisible();
-  await expect(page.locator('.board-featured h2')).toHaveText('@contentdc');
+  await expect(page.locator('.board-featured h2')).toHaveText('@smallbuilder');
   await expect(page.locator('.board-featured-kind')).toHaveText('Profile Score');
   await expect(page.locator('.board-row')).toHaveCount(3);
   await expect(page.getByText('@did-not-opt-in')).toHaveCount(0);
@@ -14,7 +14,7 @@ test('projector board fits, protects opt-out identities and rotates spotlight', 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight)).toBe(true);
   }
   await page.clock.fastForward(12000);
-  await expect(page.locator('.board-featured h2')).toHaveText('@jemmmyjemm');
+  await expect(page.locator('.board-featured h2')).toHaveText('@devbuilder');
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.screenshot({ path: 'test-results/board-projector.png', animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });

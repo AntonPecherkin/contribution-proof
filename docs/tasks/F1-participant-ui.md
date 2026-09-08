@@ -124,14 +124,17 @@ Shapes: `ScoreInput` and `Components` in `src/lib/scoring.ts`, `FunStats` in
 
 Real measured values to design against, so nothing is invented:
 
-| | score | note |
+Accounts are described rather than named: these are real people's measurements, and
+they did not ask to be scored in a public repository.
+
+| account | score | note |
 |---|---|---|
-| SuperteamMY | 780 | rel 213 · exp 76 · streak 250 · reach 212 |
-| jemmmyjemm | 760 | 13 of 19 posts technical |
-| nikkideyy | 710 | 5-week streak |
-| naval | 460 | huge account, 1 technical post |
-| ContentDC | 54 | profile only, 2 topics |
-| AChuhnina | 26 | profile only, no bio topics |
+| regional community org | 780 | rel 213 · exp 76 · streak 250 · reach 212 |
+| active builder | 760 | 13 of 19 posts technical |
+| community lead | 710 | 5-week streak |
+| very large general account | 460 | huge account, 1 technical post |
+| our own brand account | 54 | profile only, 2 topics |
+| small personal profile | 26 | profile only, no bio topics |
 
 **Design for the bottom of that range as carefully as the top.** A 26 will be handed to a
 cofounder at their own event.

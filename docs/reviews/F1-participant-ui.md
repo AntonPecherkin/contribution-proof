@@ -113,5 +113,5 @@ to someone who has never seen the scoring model.
 
 - All four routes return 200 against the live Supabase project.
 - The warm lane returns `cached: true` for an existing handle and starts no new work.
-- The result page renders `@nikkideyy` at **710** — the real score, from the real provider.
+- The result page renders a real handle at **710** — the real score, from the real provider.
 - 125 tests pass, typecheck and lint clean.
