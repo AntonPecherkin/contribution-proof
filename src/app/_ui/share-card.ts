@@ -69,10 +69,14 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
     : 'Based on your public profile';
   text(evidence, 98, 565, 21, '#201c00', 550, 532);
 
-  const metrics: Array<{ value: number | null; label: string; color: string; note?: string }> = analysis
+  const metrics: Array<{ value: number | null; label: string; color: string; note?: string; approximate?: boolean; fullNumber?: boolean }> = analysis
     ? [
-      { value: result.technologyCount, label: 'Technology posts', color: '#07db71' },
-      { value: result.stats.totalViews, label: 'Public views', note: 'Across analyzed posts', color: '#58b8fe' },
+      result.peopleEngaged != null
+        ? { value: result.peopleEngaged, label: 'People engaged in tech', note: 'Estimated · not unique people', approximate: true, color: '#07db71' }
+        : { value: result.technologyCount, label: 'Technology posts', color: '#07db71' },
+      result.daysBuilding != null
+        ? { value: result.daysBuilding, label: 'Days building in public', fullNumber: true, color: '#58b8fe' }
+        : { value: result.stats.totalViews, label: 'Times your posts were seen', note: 'Across analyzed posts', color: '#58b8fe' },
       { value: result.stats.longestStreakWeeks, label: 'Week streak', color: '#dbbd07' },
     ]
     : [
@@ -80,10 +84,10 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
       { value: result.signal.profile.postsCount, label: 'Posts', color: '#58b8fe' },
       { value: result.signal.postsPerYear, label: 'Posts per year', color: '#dbbd07' },
     ];
-  metrics.forEach(({ value, label, color, note }, i) => {
+  metrics.forEach(({ value, label, color, note, approximate, fullNumber }, i) => {
     const y = 132 + i * 165;
     box(696, y, 336, 150, color);
-    const display = value === null ? 'Not available' : new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    const display = value === null ? 'Not available' : `${approximate ? '~' : ''}${new Intl.NumberFormat('en', fullNumber ? {} : { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`;
     text(display, 720, y + 72, value === null ? 30 : 64, '#081925', 700, 288);
     text(label, 720, y + 109, 24, '#081925', 500, 288);
     if (note) text(note, 720, y + 134, 17, '#081925', 400, 288);

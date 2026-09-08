@@ -91,10 +91,10 @@ export default function Result({ id, view = 'card' }: { id: string; view?: 'card
       {!expanded ? <div className="score-reveal"><div className="reveal-stars" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div><p className="helper">{title}</p><h1 className="score">{result.score}</h1><p className="evidence">{evidence}</p></div> : <>
         <div className="metric-grid">
           <div className="tile purple"><strong>{result.score}</strong><span>{title}</span></div>
-          {result.kind === 'analysis' ? <>{result.peopleEngaged !== null
+          {result.kind === 'analysis' ? <>{result.peopleEngaged != null
             ? <div className="tile green"><strong>{approx(result.peopleEngaged)}</strong><span>People engaged in tech · estimated</span></div>
             : <div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div>}
-          {result.daysBuilding !== null
+          {result.daysBuilding != null
             ? <div className="tile blue"><strong>{new Intl.NumberFormat('en').format(result.daysBuilding)}</strong><span>Days building in public</span></div>
             : <div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Times your posts were seen</span></div>}<div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
