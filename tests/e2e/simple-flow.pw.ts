@@ -10,6 +10,12 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     await expect(page.locator('.entry-art')).toHaveCount(0);
     await expect(page.locator('.hero-logo')).toBeVisible();
     await page.getByLabel('Your X handle').fill(scenario.handle);
+    await expect(page.locator('label[for="value"]')).toBeVisible();
+    await expect(page.locator('label[for="value"]')).toHaveText('Your X handle');
+    await expect(page.locator('#value')).toBeFocused();
+    await expect(page.locator('#value')).not.toHaveAttribute('aria-label');
+    await expect(page.locator('#consent')).toBeVisible();
+    await expect(page.locator('#consent')).toHaveText('Your X handle · up to 20 recent public posts.');
     await page.screenshot({ path: `test-results/${scenario.handle}-handle.png`, fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Analyze my public posts' }).click();
     await expect(page).toHaveURL(/register\//);

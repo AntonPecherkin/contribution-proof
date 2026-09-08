@@ -110,3 +110,9 @@ visitor to develop those topics, without claiming a generated narrative or perso
 writing plan exists. Speaker matches become “People to meet.” Keep exact consent buttons,
 score types, evidence counts, analyzed dates and truthful fetching status.
 Physical-phone cold-run validation and first-hour board participation monitoring remain open.
+
+
+Entry copy guardrail: the benefit headline is separate from the visible, associated
+“Your X handle” label. Do not override that label with aria-label. Keep the helper
+“Your X handle · up to 20 recent public posts.” visible after focus and typing.
+Browser checks assert visible label and scope, not only the accessible field name.
