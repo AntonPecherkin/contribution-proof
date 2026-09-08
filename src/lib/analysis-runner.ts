@@ -14,7 +14,7 @@ import type { Post, ProfileSummary } from './providers/types';
 import type { PublicResult } from './result';
 import { computeScore } from './scoring';
 import { profileSignal } from './signal';
-import { funStats } from './stats';
+import { daysBuilding, funStats, peopleEngagedInTech } from './stats';
 
 /**
  * Drives one analysis to completion.
@@ -66,6 +66,8 @@ function buildScored(handle: string, profile: ProfileSummary, posts: Post[]): Pu
     eligibleCount: input.eligibleCount,
     technologyCount: input.relevantCount,
     powerTopics: classification.powerTopics,
+    peopleEngaged: peopleEngagedInTech(posts, classification),
+    daysBuilding: daysBuilding(profile.joinedAt),
     stats,
     opportunities: matchProjects(classification.powerTopics),
   };

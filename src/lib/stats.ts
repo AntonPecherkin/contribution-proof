@@ -1,5 +1,6 @@
 import type { Post } from './providers/types';
-import { longestStreak, weekKey } from './analysis';
+import type { Classification } from './classify';
+import { longestStreak, relevantPosts, weekKey } from './analysis';
 
 /**
  * The entertaining half. Every figure here is a plain fact about the posts we read — no
@@ -75,4 +76,41 @@ export function funStats(posts: readonly Post[]): FunStats | null {
     totalViews: withViews.length ? withViews.reduce((s, p) => s + p.views, 0) : null,
     medianViews: withViews.length ? median(withViews.map((p) => p.views)) : null,
   };
+}
+
+/**
+ * People engaged in technology, estimated.
+ *
+ * Every like, repost and reply on the posts the classifier called technology. Each one is an
+ * account acting, so the sum is an *upper* bound on distinct people: the same person can like
+ * a post and repost it. That is why it is shown with a "~" and never as an exact figure.
+ *
+ * Deliberately not views. The provider reports views on roughly a third of posts and these
+ * three on nearly all of them, so this is both the larger number and the better evidenced one.
+ *
+ * Null when the provider reported none of the three across every technology post. Zero means
+ * it reported them and nobody engaged, which is a different and true thing to say.
+ */
+export function peopleEngagedInTech(
+  posts: readonly Post[],
+  classification: Classification,
+): number | null {
+  const values = relevantPosts(posts, classification)
+    .flatMap((p) => [p.likes, p.reposts, p.replies])
+    .filter((v): v is number => v !== null);
+  return values.length === 0 ? null : values.reduce((a, b) => a + b, 0);
+}
+
+/**
+ * Whole days since the account joined.
+ *
+ * The one figure on the card available for every account we can read at all, and the only one
+ * that cannot be lowered by a quiet year. Clamped at zero rather than trusting a join date in
+ * the future, and null when the provider omitted or mangled it.
+ */
+export function daysBuilding(joinedAt: string | null): number | null {
+  if (!joinedAt) return null;
+  const joined = new Date(joinedAt).getTime();
+  if (Number.isNaN(joined)) return null;
+  return Math.max(0, Math.floor((Date.now() - joined) / 86_400_000));
 }

@@ -35,6 +35,20 @@ export function longestStreak(sortedWeeks: readonly string[]): number {
   return best;
 }
 
+/**
+ * The posts a contribution is actually judged on: eligible, and classified as technology.
+ *
+ * Shared so the score and the figures shown on the result card cannot drift apart — a tile
+ * that counted a different set of posts from the score would be quietly lying about it.
+ */
+export function relevantPosts(
+  posts: readonly Post[],
+  classification: Classification,
+): Post[] {
+  const judgement = new Map(classification.posts.map((p) => [p.id, p]));
+  return posts.filter(isEligible).filter((p) => judgement.get(p.id)?.isTechnology === true);
+}
+
 export function toScoreInput(
   posts: readonly Post[],
   classification: Classification,
@@ -42,7 +56,7 @@ export function toScoreInput(
   const eligible = posts.filter(isEligible);
   const judgement = new Map(classification.posts.map((p) => [p.id, p]));
 
-  const relevant = eligible.filter((p) => judgement.get(p.id)?.isTechnology === true);
+  const relevant = relevantPosts(posts, classification);
 
   const weeks = [...new Set(relevant.map((p) => weekKey(p.createdAt)))].sort();
 

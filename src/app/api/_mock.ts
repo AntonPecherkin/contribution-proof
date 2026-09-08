@@ -10,7 +10,7 @@ import type { Post, ProfileResult, ProfileSummary, ProviderErrorClass } from '..
 import type { AnalysisStatus, PublicResult } from '../../lib/result';
 import { computeScore } from '../../lib/scoring';
 import { profileSignal } from '../../lib/signal';
-import { funStats } from '../../lib/stats';
+import { daysBuilding, funStats, peopleEngagedInTech } from '../../lib/stats';
 
 type MockAnalysis = {
   id: string;
@@ -65,6 +65,8 @@ function buildScored(handle: string, profile: ProfileSummary, posts: Post[]): Pu
     eligibleCount: input.eligibleCount,
     technologyCount: input.relevantCount,
     powerTopics: classification.powerTopics,
+    peopleEngaged: peopleEngagedInTech(posts, classification),
+    daysBuilding: daysBuilding(profile.joinedAt),
     stats: { ...stats, bestPost: null },
     opportunities: matchProjects(classification.powerTopics),
   };

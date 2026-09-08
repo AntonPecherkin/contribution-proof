@@ -10,6 +10,10 @@ import { readStatus, errorCopy } from './api';
 import { renderShareCard } from './share-card';
 
 const metric = (n: number | null) => n === null ? 'Not available' : new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+// Approximate on purpose: one person can like a post and repost it, so the sum of
+// engagements is an upper bound on people. Showing it bare would claim a precision we do
+// not have.
+const approx = (n: number) => `~${new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n)}`;
 export default function Result({ id, view = 'card' }: { id: string; view?: 'card' | 'trends' }) {
   const router = useRouter();
   const [result, setResult] = useState<PublicResult | null>(null);
@@ -87,7 +91,12 @@ export default function Result({ id, view = 'card' }: { id: string; view?: 'card
       {!expanded ? <div className="score-reveal"><div className="reveal-stars" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div><p className="helper">{title}</p><h1 className="score">{result.score}</h1><p className="evidence">{evidence}</p></div> : <>
         <div className="metric-grid">
           <div className="tile purple"><strong>{result.score}</strong><span>{title}</span></div>
-          {result.kind === 'analysis' ? <><div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div><div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Public views · analyzed posts</span></div><div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
+          {result.kind === 'analysis' ? <>{result.peopleEngaged !== null
+            ? <div className="tile green"><strong>{approx(result.peopleEngaged)}</strong><span>People engaged in tech · estimated</span></div>
+            : <div className="tile green"><strong>{result.technologyCount}</strong><span>Technology posts</span></div>}
+          {result.daysBuilding !== null
+            ? <div className="tile blue"><strong>{new Intl.NumberFormat('en').format(result.daysBuilding)}</strong><span>Days building in public</span></div>
+            : <div className="tile blue"><strong>{metric(result.stats.totalViews)}</strong><span>Times your posts were seen</span></div>}<div className="tile yellow"><strong>{result.stats.longestStreakWeeks}</strong><span>Longest streak · weeks</span></div></> : <><div className="tile green"><strong>{metric(result.signal.profile.followers)}</strong><span>Followers</span></div><div className="tile blue"><strong>{metric(result.signal.profile.postsCount)}</strong><span>Posts</span></div><div className="tile yellow"><strong>{metric(result.signal.postsPerYear)}</strong><span>Posts per year</span></div></>}
         </div><p className="evidence">{evidence}</p>
       </>}
       {expanded && topics.length > 0 && <section className="card-topics" aria-label="Topics to build on"><h2>Topics to build on</h2><p className="helper topic-direction">Your next narrative starts here.</p><div className="pills">{topics.slice(0, 3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div>{topics.length > 3 && <details><summary>{topics.length - 3} more topics</summary><div className="pills">{topics.slice(3).map(topic => <span key={topic}>{labelForTopic(topic)}</span>)}</div></details>}</section>}
@@ -105,7 +114,7 @@ export default function Result({ id, view = 'card' }: { id: string; view?: 'card
         {result.kind === 'profile' && <p className="helper">{result.signal.note}</p>}
         <p className="helper">An experimental signal from public activity, not a measure of skill or worth.</p>
       </details>
-      {result.kind === 'analysis' && <details><summary>More about your posts</summary><dl className="stats"><dt>Window</dt><dd>{result.stats.from} – {result.stats.to}</dd><dt>Busiest day</dt><dd>{result.stats.busiestWeekday ?? 'Not available'}</dd><dt>Median length</dt><dd>{result.stats.medianLength} characters</dd><dt>Thread starts</dt><dd>{result.stats.threadStarts}</dd></dl></details>}
+      {result.kind === 'analysis' && <details><summary>More about your posts</summary><dl className="stats"><dt>Window</dt><dd>{result.stats.from} – {result.stats.to}</dd><dt>Busiest day</dt><dd>{result.stats.busiestWeekday ?? 'Not available'}</dd><dt>Median length</dt><dd>{result.stats.medianLength} characters</dd><dt>Thread starts</dt><dd>{result.stats.threadStarts}</dd><dt>Best post</dt><dd>{result.stats.bestPost?.views != null ? `${metric(result.stats.bestPost.views)} views` : 'Not available'}</dd></dl></details>}
       <p className="helper result-note">We’ll email you when early access opens.</p>
     </div>}
     <p className="helper ownership">Ownership not verified</p>

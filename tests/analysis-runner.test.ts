@@ -84,6 +84,22 @@ describe('what a completed analysis writes', () => {
     expect(write.views_total).toBe(shown);
   });
 
+  it('carries the two card figures into the stored result, not just into memory', async () => {
+    db.from.mockImplementation(() => chainFor(queuedRow));
+    provider.fetchRecentPosts.mockResolvedValue(mapProfileRow((rich as RawProfile[])[0], 20));
+
+    await runAnalysis('a1');
+
+    const stored = completionWrite()!.result as { peopleEngaged: unknown; daysBuilding: unknown };
+    // Present as keys, and actually populated: the fixture reports engagement on 19 of 20
+    // posts and a join date, so null here would mean the wiring dropped them.
+    expect(stored).toHaveProperty('peopleEngaged');
+    expect(stored).toHaveProperty('daysBuilding');
+    expect(typeof stored.peopleEngaged).toBe('number');
+    expect(typeof stored.daysBuilding).toBe('number');
+    expect(stored.peopleEngaged as number).toBeGreaterThan(0);
+  });
+
   it('completes a profile-only account rather than failing it', async () => {
     db.from.mockImplementation(() => chainFor(queuedRow));
     provider.fetchRecentPosts.mockResolvedValue(mapProfileRow((noPosts as RawProfile[])[0], 20));

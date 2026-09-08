@@ -26,6 +26,13 @@ export type ScoredResult = {
   technologyCount: number;
   /** Topic ids, most characteristic first. Label them with labelForTopic. */
   powerTopics: string[];
+  /**
+   * Likes + reposts + replies across the technology posts. An upper bound on distinct
+   * people, so render it approximate. Null means the provider reported none of the three.
+   */
+  peopleEngaged: number | null;
+  /** Whole days since the account joined. Null when the provider omitted the join date. */
+  daysBuilding: number | null;
   stats: FunStats;
   opportunities: Match[];
 };
