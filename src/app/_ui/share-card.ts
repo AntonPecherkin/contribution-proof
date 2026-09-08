@@ -29,7 +29,8 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
   const analysis = result.kind === 'analysis';
   const topics = analysis ? result.powerTopics : result.signal.topics;
   box(0, 0, 1080, 1080, '#171717', 0);
-  text('ContentDC', 48, 88, 32, '#ffffff', 650);
+  ctx.drawImage(logo, 48, 42, 56, 56);
+  text('ContentDC', 120, 83, 32, '#ffffff', 650);
   text('CONTRIBUTION PROOF', 650, 85, 20, '#b8b8b8', 500, 382);
 
   box(48, 132, 632, 480, '#4f00af');
@@ -42,14 +43,25 @@ export async function renderShareCard(result: PublicResult): Promise<Blob> {
     : 'Based on your public profile';
   text(evidence, 98, 565, 21, '#201c00', 550, 532);
 
-  box(696, 132, 336, 232, '#07db71');
-  ctx.drawImage(logo, 776, 145, 176, 176);
-  text('YOUR PUBLIC SIGNAL', 733, 342, 18, '#072416', 600, 262);
-  box(696, 380, 336, 232, '#58b8fe');
-  const value = analysis ? result.technologyCount : result.signal.profile.followers;
-  const display = value === null ? 'Not available' : new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
-  text(display, 724, 487, value === null ? 34 : 78, '#081925', 700, 280);
-  text(analysis ? 'Technology posts' : 'Followers', 724, 549, 25, '#081925', 500, 280);
+  const metrics: Array<{ value: number | null; label: string; color: string; note?: string }> = analysis
+    ? [
+      { value: result.technologyCount, label: 'Technology posts', color: '#07db71' },
+      { value: result.stats.totalViews, label: 'Public views', note: 'Across analyzed posts', color: '#58b8fe' },
+      { value: result.stats.longestStreakWeeks, label: 'Week streak', color: '#dbbd07' },
+    ]
+    : [
+      { value: result.signal.profile.followers, label: 'Followers', color: '#07db71' },
+      { value: result.signal.profile.postsCount, label: 'Posts', color: '#58b8fe' },
+      { value: result.signal.postsPerYear, label: 'Posts per year', color: '#dbbd07' },
+    ];
+  metrics.forEach(({ value, label, color, note }, i) => {
+    const y = 132 + i * 165;
+    box(696, y, 336, 150, color);
+    const display = value === null ? 'Not available' : new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    text(display, 720, y + 72, value === null ? 30 : 64, '#081925', 700, 288);
+    text(label, 720, y + 109, 24, '#081925', 500, 288);
+    if (note) text(note, 720, y + 134, 17, '#081925', 400, 288);
+  });
 
   box(48, 632, 984, 292, '#242424');
   text(topics.length ? 'POWER TOPICS' : 'PUBLIC PROFILE', 80, 680, 19, '#bda6da', 600);
