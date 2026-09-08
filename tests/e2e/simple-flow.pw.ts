@@ -38,7 +38,9 @@ for (const scenario of [{ handle: 'devbuilder', title: 'Contribution Score' }, {
     await page.screenshot({ path: `test-results/${scenario.handle}-result.png`, fullPage: true, animations: 'disabled' });
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Share my card' }).click();
-    expect((await download).suggestedFilename()).toBe('contribution-proof.png');
+    const card = await download;
+    expect(card.suggestedFilename()).toBe('contribution-proof.png');
+    await card.saveAs(`test-results/${scenario.handle}-share.png`);
   });
 }
 
