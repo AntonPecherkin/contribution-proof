@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { track } from '../../../lib/analytics';
 import { getDb } from '../../../lib/db';
 import { normalizeEmail } from '../../../lib/normalize';
+import { isMockApi, mockPostParticipant } from '../_mock';
 
 /**
  * Record a lead.
@@ -13,6 +14,8 @@ import { normalizeEmail } from '../../../lib/normalize';
  */
 
 export async function POST(request: Request): Promise<NextResponse> {
+  if (isMockApi()) return mockPostParticipant(request);
+
   let body: {
     analysisId?: unknown;
     email?: unknown;
